@@ -1,53 +1,55 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppScreen from '~/components/AppScreen';
 import { useAppTheme } from '~/theme/AppTheme';
 import CurexaHeader from '~/components/curexa/CurexaHeader';
 
 export default function CurexaCrmScreen() {
   const { palette } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const [selectedStage, setSelectedStage] = useState('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
 
   const [leads, setLeads] = useState([
     {
       id: 'lead-1',
-      name: 'Samantha Wright',
-      phone: '+1 (555) 392-1049',
+      name: 'Priya Sundaram',
+      phone: '+91 98112 34567',
       treatment: 'Full Cardiac Health Package',
       source: 'Direct Website Inquiry',
-      value: '$2,400',
+      value: '₹24,000',
       stage: 'NEW_LEAD',
       date: '2026-09-15',
     },
     {
       id: 'lead-2',
-      name: 'David Miller',
-      phone: '+1 (555) 481-9021',
+      name: 'Vikram Patel',
+      phone: '+91 98220 89123',
       treatment: 'Knee Replacement Surgery Consult',
       source: 'Doctor Referral',
-      value: '$8,500',
+      value: '₹85,000',
       stage: 'CONSULTED',
       date: '2026-09-14',
     },
     {
       id: 'lead-3',
-      name: 'Jessica Alba',
-      phone: '+1 (555) 712-4091',
+      name: 'Neha Agarwal',
+      phone: '+91 99341 55678',
       treatment: 'Comprehensive MRI & Spine Check',
       source: 'Health Camp',
-      value: '$1,800',
+      value: '₹18,000',
       stage: 'FOLLOW_UP',
       date: '2026-09-13',
     },
     {
       id: 'lead-4',
-      name: 'Thomas Wayne',
-      phone: '+1 (555) 201-9843',
+      name: 'Rohan Malhotra',
+      phone: '+91 97412 66789',
       treatment: 'Bariatric Consultation & Diet Plan',
       source: 'Website',
-      value: '$4,200',
+      value: '₹42,000',
       stage: 'CONVERTED',
       date: '2026-09-11',
     },
@@ -57,7 +59,7 @@ export default function CurexaCrmScreen() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [treatment, setTreatment] = useState('');
-  const [value, setValue] = useState('$1,500');
+  const [value, setValue] = useState('₹15,000');
 
   const stages = ['ALL', 'NEW_LEAD', 'CONSULTED', 'FOLLOW_UP', 'CONVERTED'];
 
@@ -73,7 +75,7 @@ export default function CurexaCrmScreen() {
       phone,
       treatment: treatment || 'Executive Health Package',
       source: 'Mobile App Lead',
-      value: value || '$1,500',
+      value: value || '₹15,000',
       stage: 'NEW_LEAD',
       date: new Date().toISOString().split('T')[0],
     };
@@ -212,7 +214,11 @@ export default function CurexaCrmScreen() {
       {/* Add Lead Modal */}
       <Modal visible={showAddModal} transparent animationType="slide" onRequestClose={() => setShowAddModal(false)}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className={`max-h-[85%] rounded-t-[24px] p-3.5 ${palette.surface}`}>
+          <Pressable className="absolute inset-0" onPress={() => setShowAddModal(false)} />
+          <View
+            style={{ paddingBottom: Math.max(insets.bottom, 28) + 24 }}
+            className={`max-h-[85%] rounded-t-[24px] p-3.5 ${palette.surface}`}
+          >
             <View className="mb-2.5 flex-row items-center justify-between border-b border-gray-200/15 pb-2">
               <Text className={`text-[15px] font-bold ${palette.text}`}>Record Patient Inquiry</Text>
               <Pressable onPress={() => setShowAddModal(false)} className={`rounded-full p-1 ${palette.surfaceAlt}`}>
@@ -226,7 +232,7 @@ export default function CurexaCrmScreen() {
                 <TextInput
                   value={name}
                   onChangeText={setName}
-                  placeholder="e.g. Thomas Wayne"
+                  placeholder="e.g. Rohan Malhotra"
                   placeholderTextColor={palette.textMutedColor}
                   className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                 />
@@ -238,7 +244,7 @@ export default function CurexaCrmScreen() {
                   <TextInput
                     value={phone}
                     onChangeText={setPhone}
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+91 98765 43210"
                     placeholderTextColor={palette.textMutedColor}
                     className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                   />
@@ -248,7 +254,7 @@ export default function CurexaCrmScreen() {
                   <TextInput
                     value={value}
                     onChangeText={setValue}
-                    placeholder="$2,000"
+                    placeholder="₹20,000"
                     placeholderTextColor={palette.textMutedColor}
                     className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                   />
@@ -260,7 +266,7 @@ export default function CurexaCrmScreen() {
                 <TextInput
                   value={treatment}
                   onChangeText={setTreatment}
-                  placeholder="e.g. Total Hip Arthroplasty"
+                  placeholder="e.g. Total Knee Replacement"
                   placeholderTextColor={palette.textMutedColor}
                   className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                 />

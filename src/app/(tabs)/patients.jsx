@@ -6,6 +6,8 @@ import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
 import UserStatusBar from '~/components/UserStatusBar';
+import LogVitalsModal from '~/components/curexa/LogVitalsModal';
+import AddAllergyVaccineModal from '~/components/curexa/AddAllergyVaccineModal';
 import { AddPatientModal, PatientDetailModal } from '~/components/curexa/CurexaModals';
 
 export default function CurexaPatientsScreen() {
@@ -14,6 +16,11 @@ export default function CurexaPatientsScreen() {
   const {
     portalMode,
     currentPatientProfile,
+    patientVitalsHistory,
+    patientAllergies,
+    removeAllergy,
+    patientVaccines,
+    removeVaccine,
     prescriptions,
     patients,
     addPatientLocally,
@@ -31,8 +38,11 @@ export default function CurexaPatientsScreen() {
   const [showAddModal, setShowAddModal] = useState(false);
 
   // Patient View State
-  const [patientTab, setPatientTab] = useState('TIMELINE'); // 'TIMELINE' | 'PRESCRIPTIONS' | 'LABS' | 'VITALS'
+  const [patientTab, setPatientTab] = useState('TIMELINE'); // 'TIMELINE' | 'PRESCRIPTIONS' | 'LABS' | 'VITALS' | 'ALLERGIES'
   const [selectedTimelineItem, setSelectedTimelineItem] = useState(null);
+  const [showLogVitalsModal, setShowLogVitalsModal] = useState(false);
+  const [showAddRecordModal, setShowAddRecordModal] = useState(false);
+  const [selectedMetricFilter, setSelectedMetricFilter] = useState('ALL');
 
   const statuses = ['ALL', 'Admitted', 'OPD / Triage', 'Outpatient', 'ICU'];
 
@@ -59,7 +69,7 @@ export default function CurexaPatientsScreen() {
     {
       id: 'EVT-101',
       title: 'Cardiology Consultation & ECG',
-      doctor: 'Dr. Sarah Lin, MD (Cardiology)',
+      doctor: 'Dr. Rajesh Sharma, MD (Cardiology)',
       date: 'Today • 09:30 AM',
       type: 'OPD_VISIT',
       status: 'In Progress',
@@ -106,12 +116,10 @@ export default function CurexaPatientsScreen() {
     },
   ];
 
-  const vitalsHistory = [
-    { date: 'Today, 08:45 AM', bp: '128/84', hr: '76 bpm', spo2: '98%', temp: '98.6 °F', weight: '64 kg' },
-    { date: 'Sep 14, 2026', bp: '124/82', hr: '74 bpm', spo2: '99%', temp: '98.4 °F', weight: '64.2 kg' },
-    { date: 'Sep 12, 2026', bp: '136/88', hr: '82 bpm', spo2: '97%', temp: '99.0 °F', weight: '64.5 kg' },
-    { date: 'Aug 22, 2026', bp: '120/80', hr: '70 bpm', spo2: '99%', temp: '98.6 °F', weight: '63.8 kg' },
-  ];
+  const filteredVitals = useMemo(() => {
+    if (selectedMetricFilter === 'ALL') return patientVitalsHistory;
+    return patientVitalsHistory.filter((v) => v.metric === selectedMetricFilter);
+  }, [patientVitalsHistory, selectedMetricFilter]);
 
   return (
     <AppScreen>
@@ -143,38 +151,45 @@ export default function CurexaPatientsScreen() {
         /* ========================================================================= */
         <View className="flex-1 px-3 pt-2">
           {/* Patient Subtabs */}
-          <View className={`mb-2 flex-row rounded-[14px] p-1 ${palette.surface}`}>
-            {[
-              { key: 'TIMELINE', label: 'Timeline', icon: 'git-commit-outline' },
-              { key: 'PRESCRIPTIONS', label: 'e-Rx Prescriptions', icon: 'document-text-outline' },
-              { key: 'LABS', label: 'Diagnostics', icon: 'flask-outline' },
-              { key: 'VITALS', label: 'Vitals Trends', icon: 'analytics-outline' },
-            ].map((tab) => (
-              <Pressable
-                key={tab.key}
-                onPress={() => setPatientTab(tab.key)}
-                className={`flex-1 flex-row items-center justify-center gap-1 rounded-[10px] py-1.5 ${
-                  patientTab === tab.key ? 'bg-sky-600 shadow-sm' : 'transparent'
-                }`}
-              >
-                <Ionicons
-                  name={tab.icon}
-                  size={13}
-                  color={patientTab === tab.key ? '#ffffff' : palette.textMutedColor}
-                />
-                <Text
-                  className={`text-[10.5px] font-bold ${
-                    patientTab === tab.key ? 'text-white' : palette.textMuted
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2 max-h-10">
+            <View className={`flex-row rounded-[14px] p-1 gap-1 ${palette.surface}`}>
+              {[
+                { key: 'TIMELINE', label: 'Timeline', icon: 'git-commit-outline' },
+                { key: 'PRESCRIPTIONS', label: 'e-Rx', icon: 'document-text-outline' },
+                { key: 'LABS', label: 'Diagnostics', icon: 'flask-outline' },
+                { key: 'VITALS', label: 'Biometrics', icon: 'pulse-outline' },
+                { key: 'ALLERGIES', label: 'Allergies & Vaccines', icon: 'shield-checkmark-outline' },
+              ].map((tab) => (
+                <Pressable
+                  key={tab.key}
+                  onPress={() => setPatientTab(tab.key)}
+                  className={`flex-row items-center justify-center gap-1 rounded-[10px] px-2.5 py-1.5 ${
+                    patientTab === tab.key ? 'bg-sky-600 shadow-sm' : 'transparent'
                   }`}
-                  numberOfLines={1}
                 >
-                  {tab.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+                  <Ionicons
+                    name={tab.icon}
+                    size={13}
+                    color={patientTab === tab.key ? '#ffffff' : palette.textMutedColor}
+                  />
+                  <Text
+                    className={`text-[10.5px] font-bold ${
+                      patientTab === tab.key ? 'text-white' : palette.textMuted
+                    }`}
+                    numberOfLines={1}
+                  >
+                    {tab.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </ScrollView>
 
-          <ScrollView showsVerticalScrollIndicator={false} className="flex-1 pb-24">
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            className="flex-1"
+            contentContainerStyle={{ paddingBottom: 120 }}
+          >
             {/* TAB: TIMELINE */}
             {patientTab === 'TIMELINE' && (
               <View className="gap-2.5">
@@ -251,7 +266,7 @@ export default function CurexaPatientsScreen() {
                     </View>
 
                     <Pressable
-                      onPress={() => Alert.alert('Download e-Rx', `Downloading official e-Prescription ${rx.id} PDF...`)}
+                      onPress={() => Alert.alert('Download e-Rx', `Downloading official e-Prescription ${rx.id} PDF with digital signature...`)}
                       className="flex-row items-center justify-center gap-1.5 rounded-[10px] bg-purple-600/15 py-2"
                     >
                       <Ionicons name="download-outline" size={14} color="#8b5cf6" />
@@ -273,21 +288,21 @@ export default function CurexaPatientsScreen() {
                     doctor: 'Dr. Sarah Lin',
                     status: 'Completed',
                     results: [
-                      { test: 'Hemoglobin', value: '13.8 g/dL', status: 'Normal' },
-                      { test: 'Total Cholesterol', value: '188 mg/dL', status: 'Normal' },
-                      { test: 'HDL Cholesterol', value: '54 mg/dL', status: 'Optimal' },
-                      { test: 'Triglycerides', value: '142 mg/dL', status: 'Normal' },
+                      { test: 'Hemoglobin', value: '13.8 g/dL', status: 'Normal', range: '12.0 - 15.5 g/dL' },
+                      { test: 'Total Cholesterol', value: '188 mg/dL', status: 'Optimal', range: '< 200 mg/dL' },
+                      { test: 'HDL Cholesterol', value: '54 mg/dL', status: 'Optimal', range: '> 50 mg/dL' },
+                      { test: 'Triglycerides', value: '142 mg/dL', status: 'Normal', range: '< 150 mg/dL' },
                     ],
                   },
                   {
                     id: 'LAB-902',
                     name: 'Non-Contrast Brain CT Scan Report',
                     date: 'Sep 14, 2026',
-                    doctor: 'Dr. Mark Bennett',
+                    doctor: 'Dr. Amit Malhotra',
                     status: 'Completed',
                     results: [
-                      { test: 'Ventricular System', value: 'Normal Calibre', status: 'Normal' },
-                      { test: 'Intracranial Hemorrhage', value: 'Negative / Absent', status: 'Clear' },
+                      { test: 'Ventricular System', value: 'Normal Calibre', status: 'Normal', range: 'Symmetric' },
+                      { test: 'Intracranial Hemorrhage', value: 'Negative / Absent', status: 'Clear', range: 'None' },
                     ],
                   },
                 ].map((lab) => (
@@ -307,10 +322,13 @@ export default function CurexaPatientsScreen() {
                     <View className="my-2 gap-1.5">
                       {lab.results.map((r, i) => (
                         <View key={i} className={`flex-row items-center justify-between rounded-[8px] p-2 ${palette.surfaceInset}`}>
-                          <Text className={`text-[11px] font-medium ${palette.text}`}>{r.test}</Text>
+                          <View>
+                            <Text className={`text-[11px] font-medium ${palette.text}`}>{r.test}</Text>
+                            <Text className={`text-[9px] ${palette.textMuted}`}>Ref: {r.range}</Text>
+                          </View>
                           <View className="flex-row items-center gap-1.5">
                             <Text className={`text-[11px] font-bold ${palette.text}`}>{r.value}</Text>
-                            <View className="rounded bg-emerald-500/15 px-1 py-0.5">
+                            <View className="rounded bg-emerald-500/15 px-1.5 py-0.5">
                               <Text className="text-[8.5px] font-bold text-emerald-700">{r.status}</Text>
                             </View>
                           </View>
@@ -330,38 +348,166 @@ export default function CurexaPatientsScreen() {
               </View>
             )}
 
-            {/* TAB: VITALS */}
+            {/* TAB: VITALS & BIOMETRICS (from HealthyFine) */}
             {patientTab === 'VITALS' && (
               <View className="gap-2">
                 <View className={`rounded-[16px] p-3 shadow-sm ${palette.surface}`}>
-                  <Text className={`text-[12px] font-bold uppercase tracking-[0.8px] text-teal-600 mb-2`}>
-                    Biometric & Vitals Timeline
-                  </Text>
-                  <View className="gap-2">
-                    {vitalsHistory.map((v, idx) => (
-                      <View key={idx} className={`rounded-[12px] p-2.5 ${palette.surfaceInset}`}>
-                        <View className="flex-row items-center justify-between mb-1.5 border-b border-gray-200/15 pb-1">
-                          <Text className="text-[11px] font-bold text-sky-600">{v.date}</Text>
-                          <Text className={`text-[10px] ${palette.textMuted}`}>Weight: {v.weight}</Text>
+                  <View className="flex-row items-center justify-between mb-2">
+                    <View>
+                      <Text className={`text-[12px] font-bold uppercase tracking-[0.8px] text-teal-600`}>
+                        Biometric & Vitals Timeline
+                      </Text>
+                      <Text className={`text-[10px] ${palette.textMuted}`}>
+                        {patientVitalsHistory.length} recorded measurements
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={() => setShowLogVitalsModal(true)}
+                      className="flex-row items-center gap-1 rounded-[8px] bg-teal-500/20 px-2 py-1"
+                    >
+                      <Ionicons name="add" size={13} color="#0d9488" />
+                      <Text className="text-[10px] font-bold text-teal-700">Log Reading</Text>
+                    </Pressable>
+                  </View>
+
+                  {/* Filter Chips */}
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
+                    <View className="flex-row gap-1">
+                      {['ALL', 'Blood Pressure', 'Glucose/Sugar', 'Heart Rate', 'Blood Oxygen (SpO2)', 'Body Weight', 'Body Temperature', 'Waist Circumference', 'Total Cholesterol'].map((m) => {
+                        const isSel = selectedMetricFilter === m;
+                        return (
+                          <Pressable
+                            key={m}
+                            onPress={() => setSelectedMetricFilter(m)}
+                            className={`rounded-[8px] px-2 py-1 ${
+                              isSel ? 'bg-teal-600' : palette.surfaceInset
+                            }`}
+                          >
+                            <Text
+                              className={`text-[9.5px] font-semibold ${
+                                isSel ? 'text-white font-bold' : palette.text
+                              }`}
+                            >
+                              {m}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </ScrollView>
+
+                  {/* Vitals History List */}
+                  <View className="gap-1.5">
+                    {filteredVitals.map((v) => (
+                      <View key={v.id} className={`rounded-[12px] p-2.5 ${palette.surfaceInset}`}>
+                        <View className="flex-row items-center justify-between mb-1">
+                          <View className="flex-row items-center gap-1.5">
+                            <Ionicons name="pulse" size={13} color="#0d9488" />
+                            <Text className={`text-[12px] font-bold ${palette.text}`}>{v.metric}</Text>
+                          </View>
+                          <View className="rounded bg-emerald-500/15 px-1.5 py-0.5">
+                            <Text className="text-[8.5px] font-bold text-emerald-700">{v.status || 'Normal'}</Text>
+                          </View>
                         </View>
                         <View className="flex-row items-center justify-between">
-                          <View className="items-center">
-                            <Text className={`text-[9px] ${palette.textMuted}`}>BP</Text>
-                            <Text className={`text-[12px] font-bold ${palette.text}`}>{v.bp}</Text>
-                          </View>
-                          <View className="items-center">
-                            <Text className={`text-[9px] ${palette.textMuted}`}>Pulse</Text>
-                            <Text className={`text-[12px] font-bold ${palette.text}`}>{v.hr}</Text>
-                          </View>
-                          <View className="items-center">
-                            <Text className={`text-[9px] ${palette.textMuted}`}>SpO2</Text>
-                            <Text className={`text-[12px] font-bold ${palette.text}`}>{v.spo2}</Text>
-                          </View>
-                          <View className="items-center">
-                            <Text className={`text-[9px] ${palette.textMuted}`}>Temp</Text>
-                            <Text className={`text-[12px] font-bold ${palette.text}`}>{v.temp}</Text>
-                          </View>
+                          <Text className={`text-[15px] font-extrabold ${palette.text}`}>
+                            {v.value} <Text className={`text-[11px] font-normal ${palette.textMuted}`}>{v.unit}</Text>
+                          </Text>
+                          <Text className={`text-[10px] ${palette.textMuted}`}>
+                            {v.timing} • {v.date}
+                          </Text>
                         </View>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* TAB: ALLERGIES & VACCINATIONS (from HealthyFine) */}
+            {patientTab === 'ALLERGIES' && (
+              <View className="gap-2.5">
+                {/* Allergies Card */}
+                <View className={`rounded-[16px] p-3 shadow-sm ${palette.surface}`}>
+                  <View className="flex-row items-center justify-between mb-2">
+                    <View className="flex-row items-center gap-1.5">
+                      <Ionicons name="warning" size={15} color="#d97706" />
+                      <Text className="text-[12px] font-bold uppercase tracking-[0.8px] text-amber-600">
+                        Documented Allergies
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={() => setShowAddRecordModal(true)}
+                      className="flex-row items-center gap-1 rounded-[8px] bg-amber-500/20 px-2 py-1"
+                    >
+                      <Ionicons name="add" size={13} color="#d97706" />
+                      <Text className="text-[10px] font-bold text-amber-700">Add Allergy</Text>
+                    </Pressable>
+                  </View>
+
+                  <View className="gap-1.5">
+                    {patientAllergies?.map((al) => (
+                      <View
+                        key={al.id}
+                        className={`rounded-[12px] p-2.5 flex-row items-center justify-between ${palette.surfaceInset}`}
+                      >
+                        <View className="flex-1 mr-2">
+                          <Text className={`text-[12px] font-bold ${palette.text}`}>{al.title}</Text>
+                          <Text className="text-[10px] text-amber-600 font-semibold">{al.severity}</Text>
+                          {al.notes && (
+                            <Text className={`text-[9.5px] ${palette.textMuted} mt-0.5`}>{al.notes}</Text>
+                          )}
+                        </View>
+                        <Pressable
+                          onPress={() => removeAllergy(al.id)}
+                          className="rounded-full bg-gray-500/20 p-1.5"
+                        >
+                          <Ionicons name="trash-outline" size={13} color="#ef4444" />
+                        </Pressable>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Vaccinations Card */}
+                <View className={`rounded-[16px] p-3 shadow-sm ${palette.surface}`}>
+                  <View className="flex-row items-center justify-between mb-2">
+                    <View className="flex-row items-center gap-1.5">
+                      <Ionicons name="shield-checkmark" size={15} color="#059669" />
+                      <Text className="text-[12px] font-bold uppercase tracking-[0.8px] text-emerald-600">
+                        Immunization & Vaccines
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={() => setShowAddRecordModal(true)}
+                      className="flex-row items-center gap-1 rounded-[8px] bg-emerald-500/20 px-2 py-1"
+                    >
+                      <Ionicons name="add" size={13} color="#059669" />
+                      <Text className="text-[10px] font-bold text-emerald-700">Record Vaccine</Text>
+                    </Pressable>
+                  </View>
+
+                  <View className="gap-1.5">
+                    {patientVaccines?.map((vac) => (
+                      <View
+                        key={vac.id}
+                        className={`rounded-[12px] p-2.5 flex-row items-center justify-between ${palette.surfaceInset}`}
+                      >
+                        <View className="flex-1 mr-2">
+                          <Text className={`text-[12px] font-bold ${palette.text}`}>{vac.name}</Text>
+                          <Text className="text-[10px] text-emerald-600 font-semibold">
+                            {vac.dose} • {vac.date}
+                          </Text>
+                          <Text className={`text-[9.5px] ${palette.textMuted} mt-0.5`}>
+                            {vac.facility} {vac.batch ? `(Batch: ${vac.batch})` : ''}
+                          </Text>
+                        </View>
+                        <Pressable
+                          onPress={() => removeVaccine(vac.id)}
+                          className="rounded-full bg-gray-500/20 p-1.5"
+                        >
+                          <Ionicons name="trash-outline" size={13} color="#ef4444" />
+                        </Pressable>
                       </View>
                     ))}
                   </View>
@@ -420,7 +566,11 @@ export default function CurexaPatientsScreen() {
           </ScrollView>
 
           {/* Patient Cards List */}
-          <ScrollView showsVerticalScrollIndicator={false} className="flex-1 pb-24">
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            className="flex-1"
+            contentContainerStyle={{ paddingBottom: 120 }}
+          >
             <View className="gap-2">
               {filteredPatients.map((p) => (
                 <Pressable
@@ -524,9 +674,10 @@ export default function CurexaPatientsScreen() {
           onRequestClose={() => setSelectedTimelineItem(null)}
         >
           <View className="flex-1 justify-end bg-black/60">
+            <Pressable className="absolute inset-0" onPress={() => setSelectedTimelineItem(null)} />
             <View
               className={`rounded-t-[24px] p-4 ${palette.surface}`}
-              style={{ paddingBottom: Math.max(insets.bottom, 16) + 16 }}
+              style={{ paddingBottom: Math.max(insets.bottom, 28) + 24 }}
             >
               <View className="flex-row items-center justify-between pb-3 border-b border-gray-200/15">
                 <Text className={`text-[15px] font-bold ${palette.text}`}>Medical Record Entry</Text>
@@ -573,6 +724,16 @@ export default function CurexaPatientsScreen() {
           </View>
         </Modal>
       )}
+
+      {/* Modals for Patient */}
+      <LogVitalsModal
+        visible={showLogVitalsModal}
+        onClose={() => setShowLogVitalsModal(false)}
+      />
+      <AddAllergyVaccineModal
+        visible={showAddRecordModal}
+        onClose={() => setShowAddRecordModal(false)}
+      />
 
       {/* Modals for Hospital */}
       <AddPatientModal

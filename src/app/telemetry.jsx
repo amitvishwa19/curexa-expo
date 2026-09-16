@@ -29,10 +29,10 @@ export default function CurexaTelemetryScreen() {
   }, []);
 
   const icuBeds = [
-    { id: 'ICU-01', patient: 'Eleanor Vance', age: 38, condition: 'Post-CABG Day 1', hr: heartRate, spo2: spo2, bp: `${bpSys}/${bpDia}`, status: 'STABLE' },
-    { id: 'ICU-02', patient: 'David Miller', age: 62, condition: 'Acute Respiratory Distress', hr: 94, spo2: 95, bp: '140/92', status: 'ALERT' },
-    { id: 'ICU-03', patient: 'Sophia Taylor', age: 29, condition: 'Post-Trauma ICU Obs', hr: 78, spo2: 99, bp: '118/76', status: 'STABLE' },
-    { id: 'ICU-04', patient: 'Arthur King', age: 71, condition: 'Severe Sepsis Protocol', hr: 104, spo2: 93, bp: '95/60', status: 'CRITICAL' },
+    { id: 'ICU-01', patient: 'Deepika Joshi', age: 38, condition: 'Post-CABG Day 1', hr: heartRate, spo2: spo2, bp: `${bpSys}/${bpDia}`, status: 'STABLE' },
+    { id: 'ICU-02', patient: 'Vikram Patel', age: 62, condition: 'Acute Respiratory Distress', hr: 94, spo2: 95, bp: '140/92', status: 'ALERT' },
+    { id: 'ICU-03', patient: 'Ananya Deshmukh', age: 29, condition: 'Post-Trauma ICU Obs', hr: 78, spo2: 99, bp: '118/76', status: 'STABLE' },
+    { id: 'ICU-04', patient: 'Rameshwar Prasad', age: 71, condition: 'Severe Sepsis Protocol', hr: 104, spo2: 93, bp: '95/60', status: 'CRITICAL' },
   ];
 
   const currentBed = icuBeds.find((b) => b.id === selectedBed) || icuBeds[0];

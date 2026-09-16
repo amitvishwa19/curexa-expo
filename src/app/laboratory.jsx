@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
@@ -9,6 +10,7 @@ import { CreateLabOrderModal } from '~/components/curexa/CurexaModals';
 
 export default function CurexaLaboratoryScreen() {
   const { palette } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const { labOrders, setLabOrders, addLabOrderLocally } = useCurexa();
 
   const [selectedStatus, setSelectedStatus] = useState('ALL');
@@ -177,7 +179,11 @@ export default function CurexaLaboratoryScreen() {
       {/* Result Entry Modal */}
       <Modal visible={!!selectedOrder} transparent animationType="slide" onRequestClose={() => setSelectedOrder(null)}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className={`max-h-[85%] rounded-t-[24px] p-3.5 ${palette.surface}`}>
+          <Pressable className="absolute inset-0" onPress={() => setSelectedOrder(null)} />
+          <View
+            style={{ paddingBottom: Math.max(insets.bottom, 28) + 24 }}
+            className={`max-h-[85%] rounded-t-[24px] p-3.5 ${palette.surface}`}
+          >
             <View className="mb-2.5 flex-row items-center justify-between border-b border-gray-200/15 pb-2">
               <Text className={`text-[15px] font-bold ${palette.text}`}>
                 Submit Lab Results ({selectedOrder?.orderNumber})

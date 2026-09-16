@@ -1,12 +1,14 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppScreen from '~/components/AppScreen';
 import CurexaHeader from '~/components/curexa/CurexaHeader';
 import { useAppTheme } from '~/theme/AppTheme';
 
 export default function CurexaRosterScreen() {
   const { palette } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   const [activeTab, setActiveTab] = useState('ROSTER'); // 'ROSTER' | 'SBAR_HANDOVER'
   const [showAddHandover, setShowAddHandover] = useState(false);
@@ -21,34 +23,34 @@ export default function CurexaRosterScreen() {
   const [shifts, setShifts] = useState([
     {
       dept: 'Cardiology & CCU',
-      onCallDoctor: 'Dr. Sarah Lin, MD',
-      phone: '+1 (555) 492-8811',
+      onCallDoctor: 'Dr. Rajesh Sharma, MD',
+      phone: '+91 98101 22334',
       shift: '08:00 AM - 08:00 PM (Day Lead)',
-      resident: 'Dr. Kevin Zhao',
+      resident: 'Dr. Ananya Roy',
       status: 'ON_DUTY',
     },
     {
       dept: 'Emergency & Trauma (ER)',
-      onCallDoctor: 'Dr. Alan Harper, MD',
-      phone: '+1 (555) 910-3324',
+      onCallDoctor: 'Dr. Vikram Sen, MD',
+      phone: '+91 98112 34567',
       shift: '08:00 PM - 08:00 AM (Night On-Call)',
       resident: 'Dr. Priya Sharma',
       status: 'ON_DUTY',
     },
     {
       dept: 'Neurology & Stroke Unit',
-      onCallDoctor: 'Dr. Mark Bennett, MD',
-      phone: '+1 (555) 203-9941',
+      onCallDoctor: 'Dr. Amit Malhotra, MD',
+      phone: '+91 98220 89123',
       shift: '08:00 AM - 04:00 PM (Morning)',
       resident: 'Dr. Maya Patel',
       status: 'ON_DUTY',
     },
     {
       dept: 'Obstetrics & Gynecology',
-      onCallDoctor: 'Dr. Rachel Patel, MD',
-      phone: '+1 (555) 819-2200',
+      onCallDoctor: 'Dr. Priya Nair, MD',
+      phone: '+91 98330 45678',
       shift: '24-Hour Emergency Coverage',
-      resident: 'Dr. Linda Gomez',
+      resident: 'Dr. Kavita Rao',
       status: 'ON_STANDBY',
     },
   ]);
@@ -56,10 +58,10 @@ export default function CurexaRosterScreen() {
   const [handovers, setHandovers] = useState([
     {
       id: 'sbar-1',
-      patient: 'Eleanor Vance (Bed 302)',
+      patient: 'Deepika Joshi (Bed 302)',
       time: '08:00 AM Shift Change',
-      outgoingDr: 'Dr. Alan Harper',
-      incomingDr: 'Dr. Sarah Lin',
+      outgoingDr: 'Dr. Vikram Sen',
+      incomingDr: 'Dr. Rajesh Sharma',
       s: 'Situation: Post-CABG Day 1, chest drainage minimal (30ml/hr).',
       b: 'Background: 38yo female, CAD, post-op telemetry normal sinus rhythm.',
       a: 'Assessment: Hemodynamically stable, extubated, pain controlled on PCA pump.',
@@ -74,7 +76,7 @@ export default function CurexaRosterScreen() {
         id: `sbar-${Date.now()}`,
         patient: patientName,
         time: 'Just now',
-        outgoingDr: 'Dr. Sarah Lin',
+        outgoingDr: 'Dr. Rajesh Sharma',
         incomingDr: 'Incoming Duty Attending',
         s: `Situation: ${situation}`,
         b: `Background: ${background || 'Standard clinical history.'}`,
@@ -244,7 +246,10 @@ export default function CurexaRosterScreen() {
         <Modal visible={showAddHandover} transparent animationType="slide" onRequestClose={() => setShowAddHandover(false)}>
           <View className="flex-1 justify-end bg-black/70">
             <Pressable className="absolute inset-0" onPress={() => setShowAddHandover(false)} />
-            <View className={`rounded-t-[28px] p-4 ${palette.surface}`} style={{ maxHeight: '90%' }}>
+            <View
+              className={`rounded-t-[28px] p-4 ${palette.surface}`}
+              style={{ paddingBottom: Math.max(insets.bottom, 28) + 24, maxHeight: '90%' }}
+            >
               <View className="mb-2 flex-row items-center justify-between border-b border-gray-200/15 pb-2">
                 <Text className={`text-[15px] font-bold ${palette.text}`}>Record Clinical SBAR Handover</Text>
                 <Pressable onPress={() => setShowAddHandover(false)} className={`rounded-full p-1 ${palette.surfaceAlt}`}>
@@ -258,7 +263,7 @@ export default function CurexaRosterScreen() {
                   <TextInput
                     value={patientName}
                     onChangeText={setPatientName}
-                    placeholder="e.g. Eleanor Vance (Bed 302)"
+                    placeholder="e.g. Deepika Joshi (Bed 302)"
                     placeholderTextColor={palette.textMutedColor}
                     className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                   />

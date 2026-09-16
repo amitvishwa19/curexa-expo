@@ -12,8 +12,15 @@ import IosPortalSwitcherModal from '~/components/curexa/IosPortalSwitcherModal';
 export default function CurexaSettingsScreen() {
   const router = useRouter();
   const { palette } = useAppTheme();
-  const { hospitalInfo, portalMode, setPortalMode, currentPatientProfile } = useCurexa();
   const [showPortalModal, setShowPortalModal] = useState(false);
+  const {
+    hospitalInfo,
+    portalMode,
+    setPortalMode,
+    currentPatientProfile,
+    showDummyData,
+    setShowDummyData,
+  } = useCurexa();
 
   // Settings Toggles
   const [smsReminders, setSmsReminders] = useState(true);
@@ -28,7 +35,11 @@ export default function CurexaSettingsScreen() {
   return (
     <AppScreen>
       <UserStatusBar />
-      <ScrollView className="flex-1 px-3 pt-2 pb-24" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 px-3 pt-2"
+        contentContainerStyle={{ paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* App Mode Switcher (Hospital / Clinic vs. Patient Care) */}
         <View className={`mb-2.5 rounded-[16px] p-3 shadow-sm border border-emerald-500/30 ${palette.surface}`}>
           <View className="flex-row items-center justify-between mb-2">
@@ -84,7 +95,7 @@ export default function CurexaSettingsScreen() {
               <Text className={`text-[15px] font-bold ${palette.text}`}>{hospitalInfo.name}</Text>
               <Text className={`text-[11px] ${palette.textMuted}`}>{hospitalInfo.tagline}</Text>
               <Text className="mt-0.5 text-[10px] font-semibold text-emerald-600">
-                NABH Accredited • License #HMS-8849-US
+                NABH & NABL Accredited • License #DL-HMS-2026-ND
               </Text>
             </View>
           </View>
@@ -95,7 +106,7 @@ export default function CurexaSettingsScreen() {
           <>
             <View className={`mb-2.5 rounded-[16px] p-3 ${palette.surface}`}>
               <Text className="mb-2 text-[11px] font-bold uppercase tracking-[1px] text-sky-600">
-                Patient Medical Profile
+                Patient Medical Profile & Health Card
               </Text>
               <View className="gap-2">
                 <View className={`rounded-[12px] p-2.5 ${palette.surfaceInset}`}>
@@ -114,6 +125,25 @@ export default function CurexaSettingsScreen() {
                   </Text>
                 </View>
 
+                {/* Biometrics Summary */}
+                <View className={`rounded-[12px] p-2.5 ${palette.surfaceInset}`}>
+                  <Text className="text-[10px] font-bold uppercase tracking-[0.5px] text-teal-600 mb-1">
+                    Physical Biomarkers & Vitals
+                  </Text>
+                  <View className="flex-row items-center justify-between">
+                    <Text className={`text-[11px] ${palette.text}`}>
+                      Height: <Text className="font-bold">{currentPatientProfile?.vitals?.height || '168 cm'}</Text>
+                    </Text>
+                    <Text className={`text-[11px] ${palette.text}`}>
+                      Weight: <Text className="font-bold">{currentPatientProfile?.vitals?.weight || '64 kg'}</Text>
+                    </Text>
+                    <Text className={`text-[11px] ${palette.text}`}>
+                      BMI: <Text className="font-bold text-emerald-600">{currentPatientProfile?.vitals?.bmi || '22.7'}</Text>
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Emergency Contact */}
                 <View className={`rounded-[12px] p-2.5 ${palette.surfaceInset}`}>
                   <Text className="text-[10px] font-bold uppercase tracking-[0.5px] text-rose-600 mb-1">
                     Emergency Contact (ICE)
@@ -126,16 +156,25 @@ export default function CurexaSettingsScreen() {
                   </Text>
                 </View>
 
+                {/* Insurance Policy */}
                 <View className={`rounded-[12px] p-2.5 ${palette.surfaceInset}`}>
-                  <Text className="text-[10px] font-bold uppercase tracking-[0.5px] text-amber-600 mb-1">
-                    Documented Allergies
+                  <Text className="text-[10px] font-bold uppercase tracking-[0.5px] text-sky-600 mb-1">
+                    Active Health Insurance
                   </Text>
-                  <View className="flex-row flex-wrap gap-1">
-                    {currentPatientProfile?.allergies?.map((al, idx) => (
-                      <View key={idx} className="rounded-full bg-amber-500/20 px-2 py-0.5">
-                        <Text className="text-[9.5px] font-bold text-amber-700">{al}</Text>
-                      </View>
-                    ))}
+                  <View className="flex-row items-center justify-between">
+                    <View>
+                      <Text className={`text-[12px] font-bold ${palette.text}`}>
+                        {currentPatientProfile?.insurance?.provider || 'Star Health Insurance (TPA: MediAssist)'}
+                      </Text>
+                      <Text className={`text-[10px] ${palette.textMuted}`}>
+                        Policy: {currentPatientProfile?.insurance?.policyNumber || 'SHI-9923841'}
+                      </Text>
+                    </View>
+                    <View className="rounded bg-sky-500/20 px-2 py-0.5">
+                      <Text className="text-[9.5px] font-bold text-sky-700">
+                        {currentPatientProfile?.insurance?.coverage || '85%'} Covered
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>
@@ -143,16 +182,16 @@ export default function CurexaSettingsScreen() {
 
             <View className={`mb-2.5 rounded-[16px] p-3 ${palette.surface}`}>
               <Text className="mb-2 text-[11px] font-bold uppercase tracking-[1px] text-sky-600">
-                Patient Portal Privileges
+                Smart Patient Notifications
               </Text>
               <View className="gap-2.5">
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1 pr-2">
                     <Text className={`text-[13px] font-bold ${palette.text}`}>
-                      Instant Online OPD Booking
+                      Daily Pill & Dose Reminders
                     </Text>
                     <Text className={`text-[10px] ${palette.textMuted}`}>
-                      Allow patients to reserve doctor consultation tokens directly
+                      Timely push alerts for morning, noon, and bedtime medication
                     </Text>
                   </View>
                   <Switch
@@ -165,10 +204,10 @@ export default function CurexaSettingsScreen() {
                 <View className="flex-row items-center justify-between border-t border-gray-200/10 pt-2">
                   <View className="flex-1 pr-2">
                     <Text className={`text-[13px] font-bold ${palette.text}`}>
-                      Direct Lab Report Downloads
+                      Lab Report Ready Alerts
                     </Text>
                     <Text className={`text-[10px] ${palette.textMuted}`}>
-                      Automatic PDF access as soon as tests are signed by pathologist
+                      Instant notification and automatic PDF download upon doctor sign-off
                     </Text>
                   </View>
                   <Switch
@@ -178,6 +217,40 @@ export default function CurexaSettingsScreen() {
                   />
                 </View>
               </View>
+            </View>
+
+            {/* Developer & Demo Data (Stored in Expo SecureStore) */}
+            <View className={`mb-2.5 rounded-[16px] p-3 border border-amber-500/30 ${palette.surface}`}>
+              <View className="flex-row items-center justify-between mb-1.5">
+                <View className="flex-row items-center gap-2">
+                  <View className="h-7 w-7 items-center justify-center rounded-[8px] bg-amber-500/15">
+                    <Ionicons name="code-slash-outline" size={15} color="#d97706" />
+                  </View>
+                  <View>
+                    <View className="flex-row items-center gap-1.5">
+                      <Text className="text-[10px] font-bold uppercase tracking-[0.8px] text-amber-600">
+                        DEVELOPER SETTING
+                      </Text>
+                      <View className="rounded-full bg-amber-500/20 px-1.5 py-0.2">
+                        <Text className="text-[8.5px] font-bold text-amber-700">SECURE</Text>
+                      </View>
+                    </View>
+                    <Text className={`text-[13px] font-bold ${palette.text}`}>
+                      Show Dummy Data (Dev)
+                    </Text>
+                  </View>
+                </View>
+                <Switch
+                  value={showDummyData}
+                  onValueChange={(val) => setShowDummyData(val)}
+                  trackColor={{ false: '#767577', true: '#d97706' }}
+                />
+              </View>
+              <Text className={`text-[10.5px] leading-4 ${palette.textMuted}`}>
+                {showDummyData
+                  ? 'Active: Loading simulated vitals history, mock e-prescriptions, vaccines, and family dependents. Persisted in Expo SecureStore.'
+                  : 'Disabled: Demo records cleared for live patient testing and clean state EMR sync. Persisted in Expo SecureStore.'}
+              </Text>
             </View>
           </>
         )}

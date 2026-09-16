@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
@@ -9,6 +10,7 @@ import { CreateInvoiceModal } from '~/components/curexa/CurexaModals';
 
 export default function CurexaBillingScreen() {
   const { palette } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const { invoices, setInvoices, addInvoiceLocally } = useCurexa();
 
   const [selectedStatus, setSelectedStatus] = useState('ALL');
@@ -62,19 +64,19 @@ export default function CurexaBillingScreen() {
           <View className={`flex-1 rounded-[14px] p-2.5 ${palette.surface}`}>
             <Text className="text-[9px] font-bold uppercase text-emerald-600">Collected</Text>
             <Text className={`mt-0.5 text-[15px] font-bold ${palette.text}`}>
-              ${summary.totalCollected.toFixed(0)}
+              ₹{summary.totalCollected.toLocaleString('en-IN')}
             </Text>
           </View>
           <View className={`flex-1 rounded-[14px] p-2.5 ${palette.surface}`}>
             <Text className="text-[9px] font-bold uppercase text-amber-600">Pending</Text>
             <Text className={`mt-0.5 text-[15px] font-bold ${palette.text}`}>
-              ${summary.totalPending.toFixed(0)}
+              ₹{summary.totalPending.toLocaleString('en-IN')}
             </Text>
           </View>
           <View className={`flex-1 rounded-[14px] p-2.5 ${palette.surface}`}>
             <Text className="text-[9px] font-bold uppercase text-sky-600">Total Billed</Text>
             <Text className={`mt-0.5 text-[15px] font-bold ${palette.text}`}>
-              ${summary.totalBilled.toFixed(0)}
+              ₹{summary.totalBilled.toLocaleString('en-IN')}
             </Text>
           </View>
         </View>
@@ -126,7 +128,7 @@ export default function CurexaBillingScreen() {
 
                   <View className="items-end">
                     <Text className="text-[14px] font-bold text-amber-600">
-                      ${typeof inv.amount === 'number' ? inv.amount.toFixed(2) : inv.amount}
+                      ₹{typeof inv.amount === 'number' ? inv.amount.toLocaleString('en-IN') : inv.amount}
                     </Text>
                     <View
                       className={`mt-0.5 rounded-full px-2 py-0.5 ${
@@ -160,7 +162,7 @@ export default function CurexaBillingScreen() {
                         <Text className={`text-[10px] ${palette.textMuted}`} numberOfLines={1}>
                           • {item.name}
                         </Text>
-                        <Text className={`text-[10px] font-semibold ${palette.text}`}>${item.total}</Text>
+                        <Text className={`text-[10px] font-semibold ${palette.text}`}>₹{item.total}</Text>
                       </View>
                     ))}
                   </View>
@@ -174,7 +176,11 @@ export default function CurexaBillingScreen() {
       {/* Invoice Detail Sheet */}
       <Modal visible={!!selectedInvoice} transparent animationType="slide" onRequestClose={() => setSelectedInvoice(null)}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className={`max-h-[85%] rounded-t-[24px] p-3.5 ${palette.surface}`}>
+          <Pressable className="absolute inset-0" onPress={() => setSelectedInvoice(null)} />
+          <View
+            style={{ paddingBottom: Math.max(insets.bottom, 28) + 24 }}
+            className={`max-h-[85%] rounded-t-[24px] p-3.5 ${palette.surface}`}
+          >
             <View className="mb-2.5 flex-row items-center justify-between border-b border-gray-200/15 pb-2">
               <View>
                 <Text className={`text-[15px] font-bold ${palette.text}`}>
@@ -191,15 +197,15 @@ export default function CurexaBillingScreen() {
               <View className={`rounded-[12px] p-3 ${palette.surfaceInset}`}>
                 <View className="flex-row justify-between mb-1">
                   <Text className={`text-[11px] ${palette.textMuted}`}>Total Billed</Text>
-                  <Text className={`text-[12px] font-bold ${palette.text}`}>${selectedInvoice?.amount}</Text>
+                  <Text className={`text-[12px] font-bold ${palette.text}`}>₹{selectedInvoice?.amount?.toLocaleString?.('en-IN') ?? selectedInvoice?.amount}</Text>
                 </View>
                 <View className="flex-row justify-between mb-1">
                   <Text className={`text-[11px] ${palette.textMuted}`}>Amount Paid</Text>
-                  <Text className="text-[12px] font-bold text-emerald-600">${selectedInvoice?.paidAmount}</Text>
+                  <Text className="text-[12px] font-bold text-emerald-600">₹{selectedInvoice?.paidAmount?.toLocaleString?.('en-IN') ?? selectedInvoice?.paidAmount}</Text>
                 </View>
                 <View className="flex-row justify-between border-t border-gray-200/15 pt-1">
                   <Text className={`text-[11px] font-bold ${palette.text}`}>Outstanding Balance</Text>
-                  <Text className="text-[12px] font-bold text-amber-600">${selectedInvoice?.balance}</Text>
+                  <Text className="text-[12px] font-bold text-amber-600">₹{selectedInvoice?.balance?.toLocaleString?.('en-IN') ?? selectedInvoice?.balance}</Text>
                 </View>
               </View>
 
@@ -208,7 +214,7 @@ export default function CurexaBillingScreen() {
                   onPress={() => markInvoicePaid(selectedInvoice.id)}
                   className="rounded-[12px] bg-emerald-600 py-2.5 items-center mt-1"
                 >
-                  <Text className="text-[12px] font-bold text-white">Record Full Payment ($ {selectedInvoice?.balance})</Text>
+                  <Text className="text-[12px] font-bold text-white">Record Full Payment (₹{selectedInvoice?.balance?.toLocaleString?.('en-IN') ?? selectedInvoice?.balance})</Text>
                 </Pressable>
               )}
             </View>

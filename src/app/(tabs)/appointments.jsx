@@ -194,7 +194,11 @@ export default function CurexaAppointmentsScreen() {
             ))}
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false} className="flex-1 pb-24">
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            className="flex-1"
+            contentContainerStyle={{ paddingBottom: 120 }}
+          >
             <View className="gap-2">
               {(patientTab === 'UPCOMING'
                 ? appointments.filter((a) => a.status !== 'COMPLETED')
@@ -303,7 +307,11 @@ export default function CurexaAppointmentsScreen() {
           </ScrollView>
 
           {/* Appointments List */}
-          <ScrollView showsVerticalScrollIndicator={false} className="flex-1 pb-24">
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            className="flex-1"
+            contentContainerStyle={{ paddingBottom: 120 }}
+          >
             <View className="gap-2">
               {filteredAppointments.map((apt) => (
                 <View key={apt.id} className={`rounded-[16px] p-3 shadow-sm ${palette.surface}`}>
@@ -405,9 +413,10 @@ export default function CurexaAppointmentsScreen() {
           onRequestClose={() => setSelectedVisitDetail(null)}
         >
           <View className="flex-1 justify-end bg-black/60">
+            <Pressable className="absolute inset-0" onPress={() => setSelectedVisitDetail(null)} />
             <View
               className={`rounded-t-[24px] p-4 ${palette.surface}`}
-              style={{ paddingBottom: Math.max(insets.bottom, 16) + 16 }}
+              style={{ paddingBottom: Math.max(insets.bottom, 28) + 24 }}
             >
               <View className="flex-row items-center justify-between pb-3 border-b border-gray-200/15">
                 <Text className={`text-[15px] font-bold ${palette.text}`}>Appointment Pass</Text>
@@ -464,6 +473,7 @@ export default function CurexaAppointmentsScreen() {
       <BookAppointmentModal
         visible={showBookModal}
         onClose={() => setShowBookModal(false)}
+        defaultPatientName={currentPatientProfile.displayName}
         onSave={(newApt) => addAppointmentLocally(newApt)}
       />
     </AppScreen>

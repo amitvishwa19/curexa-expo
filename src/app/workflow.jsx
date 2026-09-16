@@ -16,8 +16,8 @@ export default function CurexaWorkflowScreen() {
       title: 'Triage / Reception',
       color: '#64748b',
       patients: [
-        { id: 'p-101', name: 'John Doe', age: 42, condition: 'Fever & chills', token: 'T-01', doctor: 'Dr. Sarah Lin' },
-        { id: 'p-102', name: 'Amy Pond', age: 28, condition: 'Sprained ankle', token: 'T-02', doctor: 'Dr. Alan Harper' },
+        { id: 'p-101', name: 'Suresh Kumar Gupta', age: 42, condition: 'Fever & chills', token: 'T-01', doctor: 'Dr. Rajesh Sharma' },
+        { id: 'p-102', name: 'Pooja Verma', age: 28, condition: 'Sprained ankle', token: 'T-02', doctor: 'Dr. Sneha Kulkarni' },
       ],
     },
     {
@@ -25,8 +25,8 @@ export default function CurexaWorkflowScreen() {
       title: 'In Consultation',
       color: '#0284c7',
       patients: [
-        { id: 'p-103', name: 'Eleanor Vance', age: 38, condition: 'Post-catheter review', token: 'A-01', doctor: 'Dr. Sarah Lin' },
-        { id: 'p-104', name: 'Robert Sterling', age: 52, condition: 'Severe migraine', token: 'A-02', doctor: 'Dr. Mark Bennett' },
+        { id: 'p-103', name: 'Deepika Joshi', age: 38, condition: 'Post-catheter review', token: 'A-01', doctor: 'Dr. Rajesh Sharma' },
+        { id: 'p-104', name: 'Rahul Verma', age: 52, condition: 'Severe migraine', token: 'A-02', doctor: 'Dr. Amit Malhotra' },
       ],
     },
     {
@@ -34,7 +34,7 @@ export default function CurexaWorkflowScreen() {
       title: 'Diagnostics / Labs',
       color: '#06b6d4',
       patients: [
-        { id: 'p-105', name: 'Clara Oswald', age: 29, condition: 'Routine ultrasound', token: 'A-03', doctor: 'Dr. Rachel Patel' },
+        { id: 'p-105', name: 'Ananya Deshmukh', age: 29, condition: 'Routine ultrasound', token: 'A-03', doctor: 'Dr. Priya Nair' },
       ],
     },
     {
@@ -42,7 +42,7 @@ export default function CurexaWorkflowScreen() {
       title: 'Pharmacy & Billing',
       color: '#f59e0b',
       patients: [
-        { id: 'p-106', name: 'David H. Miller', age: 61, condition: 'Knee suture removal', token: 'A-04', doctor: 'Dr. Alan Harper' },
+        { id: 'p-106', name: 'Vikram Patel', age: 61, condition: 'Knee suture removal', token: 'A-04', doctor: 'Dr. Sneha Kulkarni' },
       ],
     },
     {
@@ -50,7 +50,7 @@ export default function CurexaWorkflowScreen() {
       title: 'IPD Admitted',
       color: '#8b5cf6',
       patients: [
-        { id: 'p-107', name: 'Marcus Vance', age: 67, condition: 'ICU Post-MI', token: 'ICU-02', doctor: 'Dr. James Wilson' },
+        { id: 'p-107', name: 'Rameshwar Prasad', age: 67, condition: 'ICU Post-MI', token: 'ICU-02', doctor: 'Dr. Vikram Sen' },
       ],
     },
   ]);

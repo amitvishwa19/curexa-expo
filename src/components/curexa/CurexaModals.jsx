@@ -30,7 +30,7 @@ export function PatientDetailModal({ patient, visible, onClose }) {
         <View
           style={{
             maxHeight: '90%',
-            paddingBottom: Math.max(insets.bottom, 16) + 14,
+            paddingBottom: Math.max(insets.bottom, 28) + 24,
           }}
           className={`rounded-t-[28px] p-4 ${palette.surface}`}
         >
@@ -181,10 +181,10 @@ export function PatientDetailModal({ patient, visible, onClose }) {
                 <View className={`rounded-[14px] p-2.5 ${palette.surfaceInset}`}>
                   <Text className={`text-[10px] uppercase font-bold text-purple-600`}>Insurance & TPA</Text>
                   <Text className={`mt-1 text-[12px] font-semibold ${palette.text}`}>
-                    {patient.insurance?.provider || 'Blue Cross Blue Shield'}
+                    {patient.insurance?.provider || 'Star Health Insurance (TPA: MediAssist)'}
                   </Text>
                   <Text className={`text-[11px] ${palette.textMuted}`}>
-                    Policy #{patient.insurance?.policyNumber || 'BCS-9923841'} (Coverage: {patient.insurance?.coverage || '80%'})
+                    Policy #{patient.insurance?.policyNumber || 'SHI-9923841'} (Coverage: {patient.insurance?.coverage || '85%'})
                   </Text>
                 </View>
               </View>
@@ -287,7 +287,7 @@ export function AddPatientModal({ visible, onClose, onSave }) {
         <View
           style={{
             maxHeight: '90%',
-            paddingBottom: Math.max(insets.bottom, 16) + 14,
+            paddingBottom: Math.max(insets.bottom, 28) + 24,
           }}
           className={`rounded-t-[28px] p-4 ${palette.surface}`}
         >
@@ -310,7 +310,7 @@ export function AddPatientModal({ visible, onClose, onSave }) {
                 <TextInput
                   value={fullName}
                   onChangeText={setFullName}
-                  placeholder="e.g. Johnathan Davis"
+                  placeholder="e.g. Deepika Joshi"
                   placeholderTextColor={palette.textMutedColor}
                   className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                 />
@@ -323,7 +323,7 @@ export function AddPatientModal({ visible, onClose, onSave }) {
                     value={phone}
                     onChangeText={setPhone}
                     keyboardType="phone-pad"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+91 98765 43210"
                     placeholderTextColor={palette.textMutedColor}
                     className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                   />
@@ -409,32 +409,54 @@ export function AddPatientModal({ visible, onClose, onSave }) {
 /**
  * 3. Book Appointment Modal
  */
-export function BookAppointmentModal({ visible, onClose, onSave }) {
+export function BookAppointmentModal({ visible, onClose, onSave, defaultPatientName }) {
   const { palette } = useAppTheme();
   const insets = useSafeAreaInsets();
-  const [patientName, setPatientName] = useState('');
-  const [doctorName, setDoctorName] = useState('Dr. Sarah Lin (Cardio)');
+  const [patientName, setPatientName] = useState(defaultPatientName || 'Deepika Joshi');
+  const [doctorName, setDoctorName] = useState('Dr. Rajesh Sharma, MD');
+  const [specialty, setSpecialty] = useState('Cardiology');
+  const [consultType, setConsultType] = useState('IN_CLINIC'); // 'IN_CLINIC' | 'TELEHEALTH'
+  const [selectedDate, setSelectedDate] = useState('Today (Sep 16)');
   const [timeSlot, setTimeSlot] = useState('10:00 AM');
-  const [type, setType] = useState('Consultation');
   const [priority, setPriority] = useState('Normal');
+  const [symptom, setSymptom] = useState('Routine Checkup');
+
+  const doctorsList = [
+    { name: 'Dr. Rajesh Sharma, MD', specialty: 'Cardiology', fee: '₹800', cabin: 'Cabin 3B' },
+    { name: 'Dr. Amit Malhotra, MD', specialty: 'Neurology', fee: '₹950', cabin: 'Cabin 4A' },
+    { name: 'Dr. Priya Nair, MD', specialty: 'Obstetrics & Gyn', fee: '₹750', cabin: 'Cabin 2C' },
+    { name: 'Dr. Sneha Kulkarni, MS', specialty: 'Pediatrics', fee: '₹700', cabin: 'Cabin 1D' },
+    { name: 'Dr. Vikram Sen, MD', specialty: 'Orthopedics & Spine', fee: '₹900', cabin: 'Cabin 5B' },
+  ];
+
+  const datesList = ['Today (Sep 16)', 'Tomorrow (Sep 17)', 'Thu, Sep 18', 'Fri, Sep 19'];
+  const morningSlots = ['09:00 AM', '09:30 AM', '10:00 AM', '10:45 AM', '11:30 AM'];
+  const eveningSlots = ['02:00 PM', '02:45 PM', '03:30 PM', '04:15 PM', '05:00 PM'];
+  const symptomTags = ['Routine Checkup', 'Follow-up Review', 'Chest Discomfort', 'Migraine / Headache', 'High Blood Pressure', 'Lab Report Discussion'];
+
+  const handleSelectDoctor = (doc) => {
+    setDoctorName(doc.name);
+    setSpecialty(doc.specialty);
+  };
 
   const handleSave = () => {
-    if (!patientName) return;
+    if (!patientName.trim()) return;
     const newApt = {
       id: `apt-${Date.now()}`,
       token: `A-0${Math.floor(5 + Math.random() * 20)}`,
-      patientName,
+      patientName: patientName.trim(),
       doctorName,
-      timeSlot,
+      specialty,
+      timeSlot: `${selectedDate.split(' ')[0]} • ${timeSlot}`,
       date: new Date().toISOString().split('T')[0],
-      type,
+      type: consultType === 'TELEHEALTH' ? 'Telemedicine Video' : 'In-Clinic OPD',
+      consultType,
       priority,
       status: 'SCHEDULED',
-      symptoms: 'OPD Scheduled visit',
+      symptoms: symptom,
     };
     onSave && onSave(newApt);
     onClose();
-    setPatientName('');
   };
 
   return (
@@ -447,14 +469,23 @@ export function BookAppointmentModal({ visible, onClose, onSave }) {
         <View
           style={{
             maxHeight: '90%',
-            paddingBottom: Math.max(insets.bottom, 16) + 14,
+            paddingBottom: Math.max(insets.bottom, 28) + 24,
           }}
           className={`rounded-t-[28px] p-4 ${palette.surface}`}
         >
+          {/* Header */}
           <View className="mb-2.5 flex-row items-center justify-between border-b border-gray-200/15 pb-2">
-            <Text className={`text-[15px] font-bold ${palette.text}`}>Book OPD Appointment</Text>
-            <Pressable onPress={onClose} className={`rounded-full p-1 ${palette.surfaceAlt}`}>
-              <Ionicons name="close" size={18} color={palette.textMutedColor} />
+            <View className="flex-row items-center gap-2">
+              <View className="h-8 w-8 items-center justify-center rounded-[10px] bg-sky-500/20">
+                <Ionicons name="calendar" size={17} color="#0284c7" />
+              </View>
+              <View>
+                <Text className={`text-[15px] font-bold ${palette.text}`}>Book Doctor Consultation</Text>
+                <Text className={`text-[10.5px] ${palette.textMuted}`}>OPD Queue & Telemedicine Slot</Text>
+              </View>
+            </View>
+            <Pressable onPress={onClose} className={`rounded-full p-1.5 ${palette.surfaceAlt}`}>
+              <Ionicons name="close" size={16} color={palette.textMutedColor} />
             </Pressable>
           </View>
 
@@ -465,29 +496,132 @@ export function BookAppointmentModal({ visible, onClose, onSave }) {
             className="mb-2"
           >
             <View className="gap-2.5">
+              {/* Consultation Type Toggle */}
+              <View className={`flex-row rounded-[12px] p-1 ${palette.surfaceInset}`}>
+                <Pressable
+                  onPress={() => setConsultType('IN_CLINIC')}
+                  className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-[9px] py-1.5 ${
+                    consultType === 'IN_CLINIC' ? 'bg-sky-600 shadow-sm' : 'transparent'
+                  }`}
+                >
+                  <Ionicons
+                    name="business-outline"
+                    size={14}
+                    color={consultType === 'IN_CLINIC' ? '#ffffff' : palette.textMutedColor}
+                  />
+                  <Text
+                    className={`text-[11px] font-bold ${
+                      consultType === 'IN_CLINIC' ? 'text-white' : palette.text
+                    }`}
+                  >
+                    🏥 In-Clinic OPD
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => setConsultType('TELEHEALTH')}
+                  className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-[9px] py-1.5 ${
+                    consultType === 'TELEHEALTH' ? 'bg-blue-600 shadow-sm' : 'transparent'
+                  }`}
+                >
+                  <Ionicons
+                    name="videocam-outline"
+                    size={14}
+                    color={consultType === 'TELEHEALTH' ? '#ffffff' : palette.textMutedColor}
+                  />
+                  <Text
+                    className={`text-[11px] font-bold ${
+                      consultType === 'TELEHEALTH' ? 'text-white' : palette.text
+                    }`}
+                  >
+                    📹 Telemedicine Video
+                  </Text>
+                </Pressable>
+              </View>
+
+              {/* Patient Name */}
               <View>
-                <Text className={`text-[10px] font-semibold mb-1 ${palette.textMuted}`}>Patient Name *</Text>
+                <Text className={`text-[10px] font-bold uppercase tracking-[0.5px] mb-1 ${palette.textMuted}`}>
+                  Patient Name
+                </Text>
                 <TextInput
                   value={patientName}
                   onChangeText={setPatientName}
-                  placeholder="e.g. Eleanor Vance"
+                  placeholder="Patient Name"
                   placeholderTextColor={palette.textMutedColor}
-                  className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
+                  className={`rounded-[12px] p-2 text-[12px] font-semibold border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                 />
               </View>
 
+              {/* Doctor Selection */}
               <View>
-                <Text className={`text-[10px] font-semibold mb-1 ${palette.textMuted}`}>Attending Doctor</Text>
+                <Text className={`text-[10px] font-bold uppercase tracking-[0.5px] mb-1.5 ${palette.textMuted}`}>
+                  Select Specialist / Doctor
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View className="flex-row gap-2">
+                    {doctorsList.map((doc) => {
+                      const isSel = doctorName === doc.name;
+                      return (
+                        <Pressable
+                          key={doc.name}
+                          onPress={() => handleSelectDoctor(doc)}
+                          className={`rounded-[14px] p-2.5 min-w-[150px] border ${
+                            isSel
+                              ? 'bg-sky-600 border-sky-600 shadow-sm'
+                              : `${palette.surfaceInset} border-gray-200/15`
+                          }`}
+                        >
+                          <Text
+                            className={`text-[11.5px] font-bold ${
+                              isSel ? 'text-white' : palette.text
+                            }`}
+                            numberOfLines={1}
+                          >
+                            {doc.name}
+                          </Text>
+                          <Text
+                            className={`text-[10px] ${
+                              isSel ? 'text-sky-100' : palette.textMuted
+                            }`}
+                          >
+                            {doc.specialty} • {doc.cabin}
+                          </Text>
+                          <View className="mt-1 flex-row items-center justify-between">
+                            <Text
+                              className={`text-[10px] font-bold ${
+                                isSel ? 'text-white' : 'text-emerald-600'
+                              }`}
+                            >
+                              Fee: {doc.fee}
+                            </Text>
+                            {isSel && <Ionicons name="checkmark-circle" size={13} color="#ffffff" />}
+                          </View>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </ScrollView>
+              </View>
+
+              {/* Date Selection */}
+              <View>
+                <Text className={`text-[10px] font-bold uppercase tracking-[0.5px] mb-1 ${palette.textMuted}`}>
+                  Consultation Date
+                </Text>
                 <View className="flex-row flex-wrap gap-1.5">
-                  {['Dr. Sarah Lin (Cardio)', 'Dr. Mark Bennett (Neuro)', 'Dr. Rachel Patel (OBGYN)'].map((d) => (
+                  {datesList.map((d) => (
                     <Pressable
                       key={d}
-                      onPress={() => setDoctorName(d)}
-                      className={`rounded-[10px] px-2.5 py-1.5 ${
-                        doctorName === d ? 'bg-emerald-600' : palette.surfaceInset
+                      onPress={() => setSelectedDate(d)}
+                      className={`rounded-[10px] px-2.5 py-1 ${
+                        selectedDate === d ? 'bg-sky-600' : palette.surfaceInset
                       }`}
                     >
-                      <Text className={`text-[10px] font-semibold ${doctorName === d ? 'text-white' : palette.text}`}>
+                      <Text
+                        className={`text-[10.5px] font-semibold ${
+                          selectedDate === d ? 'text-white font-bold' : palette.text
+                        }`}
+                      >
                         {d}
                       </Text>
                     </Pressable>
@@ -495,32 +629,95 @@ export function BookAppointmentModal({ visible, onClose, onSave }) {
                 </View>
               </View>
 
+              {/* Time Slots (Morning & Afternoon) */}
               <View>
-                <Text className={`text-[10px] font-semibold mb-1 ${palette.textMuted}`}>Time Slot</Text>
-                <View className="flex-row gap-1.5">
-                  {['09:30 AM', '10:15 AM', '11:00 AM', '02:30 PM'].map((slot) => (
+                <Text className={`text-[10px] font-bold uppercase tracking-[0.5px] mb-1 text-sky-600`}>
+                  Morning Slots
+                </Text>
+                <View className="flex-row flex-wrap gap-1.5 mb-2">
+                  {morningSlots.map((slot) => (
                     <Pressable
                       key={slot}
                       onPress={() => setTimeSlot(slot)}
-                      className={`flex-1 items-center rounded-[8px] py-1.5 ${
-                        timeSlot === slot ? 'bg-sky-600' : palette.surfaceInset
+                      className={`rounded-[9px] px-2.5 py-1 ${
+                        timeSlot === slot ? 'bg-emerald-600' : palette.surfaceInset
                       }`}
                     >
-                      <Text className={`text-[10px] font-semibold ${timeSlot === slot ? 'text-white' : palette.text}`}>
+                      <Text
+                        className={`text-[10px] font-semibold ${
+                          timeSlot === slot ? 'text-white font-bold' : palette.text
+                        }`}
+                      >
+                        {slot}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+
+                <Text className={`text-[10px] font-bold uppercase tracking-[0.5px] mb-1 text-sky-600`}>
+                  Afternoon & Evening Slots
+                </Text>
+                <View className="flex-row flex-wrap gap-1.5">
+                  {eveningSlots.map((slot) => (
+                    <Pressable
+                      key={slot}
+                      onPress={() => setTimeSlot(slot)}
+                      className={`rounded-[9px] px-2.5 py-1 ${
+                        timeSlot === slot ? 'bg-emerald-600' : palette.surfaceInset
+                      }`}
+                    >
+                      <Text
+                        className={`text-[10px] font-semibold ${
+                          timeSlot === slot ? 'text-white font-bold' : palette.text
+                        }`}
+                      >
                         {slot}
                       </Text>
                     </Pressable>
                   ))}
                 </View>
               </View>
+
+              {/* Symptoms / Complaint Chips */}
+              <View>
+                <Text className={`text-[10px] font-bold uppercase tracking-[0.5px] mb-1 ${palette.textMuted}`}>
+                  Chief Complaint / Reason
+                </Text>
+                <View className="flex-row flex-wrap gap-1.5 mb-1.5">
+                  {symptomTags.map((st) => (
+                    <Pressable
+                      key={st}
+                      onPress={() => setSymptom(st)}
+                      className={`rounded-[8px] px-2 py-0.5 ${
+                        symptom === st ? 'bg-sky-600' : palette.surfaceInset
+                      }`}
+                    >
+                      <Text
+                        className={`text-[9.5px] font-semibold ${
+                          symptom === st ? 'text-white font-bold' : palette.text
+                        }`}
+                      >
+                        {st}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+                <TextInput
+                  value={symptom}
+                  onChangeText={setSymptom}
+                  placeholder="Describe symptoms or reasons for visit..."
+                  placeholderTextColor={palette.textMutedColor}
+                  className={`rounded-[10px] p-2 text-[11px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
+                />
+              </View>
             </View>
           </ScrollView>
 
           <View className="flex-row gap-2 pt-2 border-t border-gray-200/15">
-            <Pressable onPress={onClose} className="flex-1 rounded-[12px] bg-gray-500/15 py-3 items-center">
+            <Pressable onPress={onClose} className="flex-1 rounded-[12px] bg-gray-500/15 py-2.5 items-center">
               <Text className={`text-[12px] font-bold ${palette.text}`}>Cancel</Text>
             </Pressable>
-            <Pressable onPress={handleSave} className="flex-1 rounded-[12px] bg-emerald-600 py-3 items-center">
+            <Pressable onPress={handleSave} className="flex-1 rounded-[12px] bg-sky-600 py-2.5 items-center shadow-md">
               <Text className="text-[12px] font-bold text-white">Confirm Booking</Text>
             </Pressable>
           </View>
@@ -568,7 +765,7 @@ export function CreatePrescriptionModal({ visible, onClose, onSave }) {
         <View
           style={{
             maxHeight: '90%',
-            paddingBottom: Math.max(insets.bottom, 16) + 14,
+            paddingBottom: Math.max(insets.bottom, 28) + 24,
           }}
           className={`rounded-t-[28px] p-4 ${palette.surface}`}
         >
@@ -591,7 +788,7 @@ export function CreatePrescriptionModal({ visible, onClose, onSave }) {
                 <TextInput
                   value={patientName}
                   onChangeText={setPatientName}
-                  placeholder="e.g. Robert Sterling"
+                  placeholder="e.g. Deepika Joshi"
                   placeholderTextColor={palette.textMutedColor}
                   className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                 />
@@ -706,7 +903,7 @@ export function CreateLabOrderModal({ visible, onClose, onSave }) {
         <View
           style={{
             maxHeight: '90%',
-            paddingBottom: Math.max(insets.bottom, 16) + 14,
+            paddingBottom: Math.max(insets.bottom, 28) + 24,
           }}
           className={`rounded-t-[28px] p-4 ${palette.surface}`}
         >
@@ -729,7 +926,7 @@ export function CreateLabOrderModal({ visible, onClose, onSave }) {
                 <TextInput
                   value={patientName}
                   onChangeText={setPatientName}
-                  placeholder="e.g. Clara Oswald"
+                  placeholder="e.g. Ananya Deshmukh"
                   placeholderTextColor={palette.textMutedColor}
                   className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                 />
@@ -780,7 +977,7 @@ export function CreateInvoiceModal({ visible, onClose, onSave }) {
   const { palette } = useAppTheme();
   const insets = useSafeAreaInsets();
   const [patientName, setPatientName] = useState('');
-  const [amount, setAmount] = useState('250.00');
+  const [amount, setAmount] = useState('2500');
   const [category, setCategory] = useState('Consultation');
 
   const handleSave = () => {
@@ -794,7 +991,7 @@ export function CreateInvoiceModal({ visible, onClose, onSave }) {
         paidAmount: parseFloat(amount) || 0,
         balance: 0,
         status: 'PAID',
-        paymentMethod: 'Cash / Instant Pay',
+        paymentMethod: 'UPI / PhonePe',
         date: new Date().toISOString().split('T')[0],
       });
     onClose();
@@ -811,7 +1008,7 @@ export function CreateInvoiceModal({ visible, onClose, onSave }) {
         <View
           style={{
             maxHeight: '90%',
-            paddingBottom: Math.max(insets.bottom, 16) + 14,
+            paddingBottom: Math.max(insets.bottom, 28) + 24,
           }}
           className={`rounded-t-[28px] p-4 ${palette.surface}`}
         >
@@ -834,7 +1031,7 @@ export function CreateInvoiceModal({ visible, onClose, onSave }) {
                 <TextInput
                   value={patientName}
                   onChangeText={setPatientName}
-                  placeholder="e.g. Eleanor Vance"
+                  placeholder="e.g. Deepika Joshi"
                   placeholderTextColor={palette.textMutedColor}
                   className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                 />
@@ -860,12 +1057,12 @@ export function CreateInvoiceModal({ visible, onClose, onSave }) {
               </View>
 
               <View>
-                <Text className={`text-[10px] font-semibold mb-1 ${palette.textMuted}`}>Total Amount ($) *</Text>
+                <Text className={`text-[10px] font-semibold mb-1 ${palette.textMuted}`}>Total Amount (₹) *</Text>
                 <TextInput
                   value={amount}
                   onChangeText={setAmount}
                   keyboardType="numeric"
-                  placeholder="250.00"
+                  placeholder="2500"
                   placeholderTextColor={palette.textMutedColor}
                   className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                 />

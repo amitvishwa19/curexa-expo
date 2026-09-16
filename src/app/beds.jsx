@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
@@ -8,6 +9,7 @@ import CurexaHeader from '~/components/curexa/CurexaHeader';
 
 export default function CurexaBedsScreen() {
   const { palette } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const { wards, setWards } = useCurexa();
 
   const [selectedWardFilter, setSelectedWardFilter] = useState('ALL');
@@ -17,7 +19,7 @@ export default function CurexaBedsScreen() {
   const [selectedBed, setSelectedBed] = useState(null);
   const [showAdmitModal, setShowAdmitModal] = useState(false);
   const [patientName, setPatientName] = useState('');
-  const [attendingDoctor, setAttendingDoctor] = useState('Dr. Sarah Lin, MD');
+  const [attendingDoctor, setAttendingDoctor] = useState('Dr. Rajesh Sharma, MD');
 
   // Flattened bed list
   const allBeds = useMemo(() => {
@@ -243,7 +245,11 @@ export default function CurexaBedsScreen() {
       {/* Bed Action / Admit Modal */}
       <Modal visible={showAdmitModal} transparent animationType="slide" onRequestClose={() => setShowAdmitModal(false)}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className={`max-h-[85%] rounded-t-[24px] p-3.5 ${palette.surface}`}>
+          <Pressable className="absolute inset-0" onPress={() => setShowAdmitModal(false)} />
+          <View
+            style={{ paddingBottom: Math.max(insets.bottom, 28) + 24 }}
+            className={`max-h-[85%] rounded-t-[24px] p-3.5 ${palette.surface}`}
+          >
             <View className="mb-2.5 flex-row items-center justify-between border-b border-gray-200/15 pb-2">
               <View>
                 <Text className={`text-[15px] font-bold ${palette.text}`}>
@@ -264,7 +270,7 @@ export default function CurexaBedsScreen() {
                   <TextInput
                     value={patientName}
                     onChangeText={setPatientName}
-                    placeholder="e.g. Eleanor Vance"
+                    placeholder="e.g. Deepika Joshi"
                     placeholderTextColor={palette.textMutedColor}
                     className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                   />

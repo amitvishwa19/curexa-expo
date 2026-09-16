@@ -40,7 +40,7 @@ const hospitalCategories = [
   {
     title: 'CLINICAL OPERATIONS',
     items: [
-      { route: '/(tabs)', label: 'Overview Command Center', icon: 'pulse-outline', activeIcon: 'pulse' },
+      { route: '/(tabs)', label: 'Home (Command Center)', icon: 'home-outline', activeIcon: 'home' },
       { route: '/(tabs)/patients', label: 'Patient EMR Directory', icon: 'people-outline', activeIcon: 'people' },
       { route: '/(tabs)/appointments', label: 'OPD Scheduler & Queue', icon: 'calendar-outline', activeIcon: 'calendar' },
       { route: '/prescriptions', label: 'e-Prescriptions (e-Rx)', icon: 'document-text-outline', activeIcon: 'document-text' },
@@ -87,7 +87,7 @@ const patientCategories = [
   {
     title: 'MY PATIENT CARE',
     items: [
-      { route: '/(tabs)', label: 'My Health Command Hub', icon: 'home-outline', activeIcon: 'home' },
+      { route: '/(tabs)', label: 'Home (Health Hub)', icon: 'home-outline', activeIcon: 'home' },
       { route: '/(tabs)/appointments', label: 'My Doctor Visits & Tokens', icon: 'calendar-outline', activeIcon: 'calendar' },
       { route: '/(tabs)/patients', label: 'My EMR & Clinical Records', icon: 'document-text-outline', activeIcon: 'document-text' },
       { route: '/prescriptions', label: 'My Prescriptions & e-Rx', icon: 'medkit-outline', activeIcon: 'medkit' },

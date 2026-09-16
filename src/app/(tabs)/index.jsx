@@ -8,6 +8,8 @@ import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
 
 import UserStatusBar from '~/components/UserStatusBar';
+import LogVitalsModal from '~/components/curexa/LogVitalsModal';
+import AddAllergyVaccineModal from '~/components/curexa/AddAllergyVaccineModal';
 import {
   AddPatientModal,
   BookAppointmentModal,
@@ -24,6 +26,10 @@ export default function CurexaOverviewScreen() {
   const {
     portalMode,
     currentPatientProfile,
+    familyMembers,
+    activeDependentId,
+    setActiveDependentId,
+    patientVitalsHistory,
     prescriptions,
     toggleDoseTaken,
     patients,
@@ -53,6 +59,8 @@ export default function CurexaOverviewScreen() {
 
   // Patient modal states
   const [showHealthCardModal, setShowHealthCardModal] = useState(false);
+  const [showLogVitalsModal, setShowLogVitalsModal] = useState(false);
+  const [showAddRecordModal, setShowAddRecordModal] = useState(false);
   const [selectedRxPdf, setSelectedRxPdf] = useState(null);
   const [selectedLabReport, setSelectedLabReport] = useState(null);
 
@@ -121,6 +129,27 @@ export default function CurexaOverviewScreen() {
   );
   const activeRx = patientPrescriptions[0] || prescriptions[0];
 
+  // Dose calculation
+  let totalDosesToday = 0;
+  let takenDosesToday = 0;
+  if (activeRx && activeRx.medicines) {
+    activeRx.medicines.forEach((m) => {
+      if (m.dosage.includes('1 -') || m.dosage.includes('1-')) {
+        totalDosesToday += 1;
+        if (m.takenMorning) takenDosesToday += 1;
+      }
+      if (m.dosage.includes('- 1 -') || m.dosage.includes('-1-')) {
+        totalDosesToday += 1;
+        if (m.takenAfternoon) takenDosesToday += 1;
+      }
+      if (m.dosage.includes('- 1') || m.dosage.includes('-1')) {
+        totalDosesToday += 1;
+        if (m.takenNight) takenDosesToday += 1;
+      }
+    });
+  }
+  const adherencePercent = totalDosesToday > 0 ? Math.round((takenDosesToday / totalDosesToday) * 100) : 100;
+
   const handleSosCall = () => {
     Alert.alert(
       '🚨 24x7 Emergency Ambulance',
@@ -153,8 +182,47 @@ export default function CurexaOverviewScreen() {
       />
 
       {isPatient ? (
-        /* PATIENT HEALTH HUB VIEW */
-        <ScrollView className="flex-1 px-3 pt-2 pb-24" showsVerticalScrollIndicator={false}>
+        /* ========================================================================= */
+        /*                       PATIENT HEALTH HUB VIEW                             */
+        /* ========================================================================= */
+        <ScrollView
+          className="flex-1 px-3 pt-2"
+          contentContainerStyle={{ paddingBottom: 120 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Family Dependents Selector Strip */}
+          <View className="mb-2 flex-row items-center justify-between">
+            <Text className="text-[10.5px] font-bold uppercase tracking-[0.8px] text-sky-600">
+              Active Member Profile
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View className="flex-row gap-1">
+                {familyMembers?.map((m) => {
+                  const isSel = activeDependentId === m.id;
+                  return (
+                    <Pressable
+                      key={m.id}
+                      onPress={() => setActiveDependentId(m.id)}
+                      className={`rounded-full px-2.5 py-0.5 border ${
+                        isSel
+                          ? 'bg-sky-600 border-sky-600 shadow-sm'
+                          : `${palette.surfaceInset} border-gray-200/15`
+                      }`}
+                    >
+                      <Text
+                        className={`text-[10px] font-bold ${
+                          isSel ? 'text-white' : palette.text
+                        }`}
+                      >
+                        {m.name}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </ScrollView>
+          </View>
+
           {/* Digital Health ID Card Banner */}
           <Pressable
             onPress={() => setShowHealthCardModal(true)}
@@ -195,7 +263,7 @@ export default function CurexaOverviewScreen() {
                 <View className="h-12 w-12 items-center justify-center rounded-[12px] bg-white p-1">
                   <Ionicons name="qr-code" size={36} color="#0284c7" />
                 </View>
-                <Text className="mt-1 text-[9px] font-semibold text-white/80">Tap to Scan</Text>
+                <Text className="mt-1 text-[9px] font-semibold text-white/80">Tap for QR</Text>
               </View>
             </View>
           </Pressable>
@@ -251,11 +319,11 @@ export default function CurexaOverviewScreen() {
               {[
                 { label: 'Book OPD Slot', icon: 'calendar-outline', color: '#0284c7', action: () => setShowBookVisit(true) },
                 { label: 'Telemedicine Video', icon: 'videocam-outline', color: '#2563eb', action: () => router.push('/telemedicine') },
+                { label: 'Log Vitals', icon: 'pulse-outline', color: '#0d9488', action: () => setShowLogVitalsModal(true) },
                 { label: 'AI Health Triage', icon: 'sparkles-outline', color: '#059669', action: () => router.push('/ai-assistant') },
                 { label: 'Lab Reports', icon: 'flask-outline', color: '#06b6d4', action: () => router.push('/laboratory') },
                 { label: 'Bedside QR Scan', icon: 'qr-code-outline', color: '#8b5cf6', action: () => router.push('/scanner') },
                 { label: 'My Invoices', icon: 'receipt-outline', color: '#f59e0b', action: () => router.push('/billing') },
-                { label: 'Find Doctors', icon: 'people-outline', color: '#ec4899', action: () => router.push('/departments') },
                 { label: '24x7 Ambulance', icon: 'car-outline', color: '#e11d48', action: handleSosCall },
               ].map((act, idx) => (
                 <Pressable
@@ -280,7 +348,7 @@ export default function CurexaOverviewScreen() {
           {/* Today's Active Prescriptions & Dosage Checklist */}
           {activeRx && (
             <View className={`mb-2.5 rounded-[16px] p-3 shadow-sm ${palette.surface}`}>
-              <View className="flex-row items-center justify-between mb-2">
+              <View className="flex-row items-center justify-between mb-1.5">
                 <View>
                   <Text className={`text-[13px] font-bold ${palette.text}`}>Today's Medications & Doses</Text>
                   <Text className={`text-[10px] ${palette.textMuted}`}>
@@ -294,6 +362,22 @@ export default function CurexaOverviewScreen() {
                   <Ionicons name="document-text-outline" size={13} color="#8b5cf6" />
                   <Text className="text-[10px] font-bold text-purple-700">View e-Rx</Text>
                 </Pressable>
+              </View>
+
+              {/* Adherence Progress Bar */}
+              <View className={`mb-2 rounded-[10px] p-2 ${palette.surfaceInset}`}>
+                <View className="flex-row items-center justify-between mb-1">
+                  <Text className={`text-[10px] font-bold ${palette.text}`}>
+                    Daily Adherence: {takenDosesToday}/{totalDosesToday || 3} Taken
+                  </Text>
+                  <Text className="text-[10px] font-bold text-emerald-600">{adherencePercent}% Score</Text>
+                </View>
+                <View className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                  <View
+                    style={{ width: `${adherencePercent}%` }}
+                    className="h-full rounded-full bg-emerald-500"
+                  />
+                </View>
               </View>
 
               <View className="gap-2">
@@ -316,7 +400,7 @@ export default function CurexaOverviewScreen() {
 
                     {/* Dose Checkbox Toggles */}
                     <View className="flex-row items-center gap-1.5">
-                      {med.dosage.includes('1 -') && (
+                      {(med.dosage.includes('1 -') || med.dosage.includes('1-')) && (
                         <Pressable
                           onPress={() => toggleDoseTaken(activeRx.id, medIdx, 'takenMorning')}
                           className={`rounded-[8px] px-2 py-1 flex-row items-center gap-1 ${
@@ -338,7 +422,29 @@ export default function CurexaOverviewScreen() {
                         </Pressable>
                       )}
 
-                      {med.dosage.includes('- 1') && (
+                      {(med.dosage.includes('- 1 -') || med.dosage.includes('-1-')) && (
+                        <Pressable
+                          onPress={() => toggleDoseTaken(activeRx.id, medIdx, 'takenAfternoon')}
+                          className={`rounded-[8px] px-2 py-1 flex-row items-center gap-1 ${
+                            med.takenAfternoon ? 'bg-emerald-600' : 'bg-gray-500/20'
+                          }`}
+                        >
+                          <Ionicons
+                            name={med.takenAfternoon ? 'checkmark-circle' : 'time-outline'}
+                            size={12}
+                            color={med.takenAfternoon ? '#ffffff' : palette.textMutedColor}
+                          />
+                          <Text
+                            className={`text-[9.5px] font-bold ${
+                              med.takenAfternoon ? 'text-white' : palette.textMuted
+                            }`}
+                          >
+                            Noon
+                          </Text>
+                        </Pressable>
+                      )}
+
+                      {(med.dosage.includes('- 1') || med.dosage.includes('-1')) && (
                         <Pressable
                           onPress={() => toggleDoseTaken(activeRx.id, medIdx, 'takenNight')}
                           className={`rounded-[8px] px-2 py-1 flex-row items-center gap-1 ${
@@ -366,23 +472,36 @@ export default function CurexaOverviewScreen() {
             </View>
           )}
 
-          {/* Personal Health Metrics & Vitals Summary */}
+          {/* 8-Parameter Health Metrics & Vitals Summary (from HealthyFine) */}
           <View className={`mb-2.5 rounded-[16px] p-3 shadow-sm ${palette.surface}`}>
             <View className="flex-row items-center justify-between mb-2">
-              <Text className={`text-[12px] font-bold uppercase tracking-[0.8px] text-teal-600`}>
-                Recent Vitals & Biometrics
-              </Text>
-              <Text className={`text-[10px] ${palette.textMuted}`}>
-                {currentPatientProfile.vitals.lastRecorded}
-              </Text>
+              <View>
+                <Text className={`text-[12px] font-bold uppercase tracking-[0.8px] text-teal-600`}>
+                  Daily Health Metrics & Vitals
+                </Text>
+                <Text className={`text-[10px] ${palette.textMuted}`}>
+                  {currentPatientProfile.vitals.lastRecorded}
+                </Text>
+              </View>
+              <Pressable
+                onPress={() => setShowLogVitalsModal(true)}
+                className="flex-row items-center gap-1 rounded-[8px] bg-teal-500/20 px-2 py-1"
+              >
+                <Ionicons name="add" size={13} color="#0d9488" />
+                <Text className="text-[10px] font-bold text-teal-700">Log Vitals</Text>
+              </Pressable>
             </View>
 
             <View className="flex-row flex-wrap gap-2">
               {[
                 { label: 'Blood Pressure', value: currentPatientProfile.vitals.bp, sub: 'Optimal (120/80)', icon: 'speedometer-outline', color: '#0284c7', tone: 'bg-sky-500/15' },
+                { label: 'Blood Sugar (Fasting)', value: currentPatientProfile.vitals.glucose, sub: 'Normal (<100 mg/dL)', icon: 'water-outline', color: '#059669', tone: 'bg-emerald-500/15' },
                 { label: 'Heart Rate', value: currentPatientProfile.vitals.heartRate, sub: 'Resting Pulse', icon: 'heart-outline', color: '#ef4444', tone: 'bg-rose-500/15' },
-                { label: 'Blood Oxygen (SpO2)', value: currentPatientProfile.vitals.spo2, sub: 'Normal Saturation', icon: 'water-outline', color: '#06b6d4', tone: 'bg-cyan-500/15' },
-                { label: 'Body Weight', value: currentPatientProfile.vitals.weight, sub: `BMI ${currentPatientProfile.vitals.bmi} • Normal`, icon: 'body-outline', color: '#059669', tone: 'bg-emerald-500/15' },
+                { label: 'Blood Oxygen (SpO2)', value: currentPatientProfile.vitals.spo2, sub: 'Optimal (98%)', icon: 'fitness-outline', color: '#06b6d4', tone: 'bg-cyan-500/15' },
+                { label: 'Body Weight', value: currentPatientProfile.vitals.weight, sub: `BMI ${currentPatientProfile.vitals.bmi} • Normal`, icon: 'body-outline', color: '#8b5cf6', tone: 'bg-purple-500/15' },
+                { label: 'Body Temperature', value: currentPatientProfile.vitals.temperature, sub: 'Normal (98.6 °F)', icon: 'thermometer-outline', color: '#f59e0b', tone: 'bg-amber-500/15' },
+                { label: 'Waist Circumference', value: currentPatientProfile.vitals.waist, sub: 'Optimal Range', icon: 'resize-outline', color: '#ec4899', tone: 'bg-pink-500/15' },
+                { label: 'Total Cholesterol', value: currentPatientProfile.vitals.cholesterol, sub: 'Desirable (<200)', icon: 'analytics-outline', color: '#6366f1', tone: 'bg-indigo-500/15' },
               ].map((v, i) => (
                 <View key={i} className={`w-[48%] flex-1 min-w-[140px] rounded-[14px] p-2.5 ${palette.surfaceInset}`}>
                   <View className="flex-row items-center justify-between mb-1">
@@ -391,8 +510,8 @@ export default function CurexaOverviewScreen() {
                       <Ionicons name={v.icon} size={13} color={v.color} />
                     </View>
                   </View>
-                  <Text className={`text-[16px] font-bold ${palette.text}`}>{v.value}</Text>
-                  <Text className="text-[9px] font-medium text-emerald-600">{v.sub}</Text>
+                  <Text className={`text-[15px] font-bold ${palette.text}`}>{v.value}</Text>
+                  <Text className="text-[9px] font-medium text-teal-600">{v.sub}</Text>
                 </View>
               ))}
             </View>
@@ -416,8 +535,8 @@ export default function CurexaOverviewScreen() {
 
             <View className="gap-1.5">
               {[
-                { id: 'LR-901', name: 'Comprehensive Blood Panel (CBC + Lipid)', date: 'Today, 08:30 AM', status: 'READY', doctor: 'Dr. Sarah Lin' },
-                { id: 'LR-902', name: 'Non-Contrast Brain CT Scan Report', date: 'Yesterday', status: 'IN_PROCESS', doctor: 'Dr. Mark Bennett' },
+                { id: 'LR-901', name: 'Comprehensive Blood Panel (CBC + Lipid)', date: 'Today, 08:30 AM', status: 'READY', doctor: 'Dr. Rajesh Sharma' },
+                { id: 'LR-902', name: 'Non-Contrast Brain CT Scan Report', date: 'Yesterday', status: 'IN_PROCESS', doctor: 'Dr. Amit Malhotra' },
               ].map((rep, idx) => (
                 <Pressable
                   key={idx}
@@ -458,7 +577,11 @@ export default function CurexaOverviewScreen() {
         </ScrollView>
       ) : (
         /* HOSPITAL COMMAND CENTER VIEW */
-        <ScrollView className="flex-1 px-3 pt-2 pb-24" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          className="flex-1 px-3 pt-2"
+          contentContainerStyle={{ paddingBottom: 120 }}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Hospital Banner */}
           <View className={`mb-2.5 rounded-[16px] p-3 shadow-sm ${palette.surface}`}>
             <View className="flex-row items-center justify-between">
@@ -692,9 +815,10 @@ export default function CurexaOverviewScreen() {
         onRequestClose={() => setShowHealthCardModal(false)}
       >
         <View className="flex-1 justify-end bg-black/60">
+          <Pressable className="absolute inset-0" onPress={() => setShowHealthCardModal(false)} />
           <View
             className={`rounded-t-[24px] p-4 ${palette.surface}`}
-            style={{ paddingBottom: Math.max(insets.bottom, 16) + 16 }}
+            style={{ paddingBottom: Math.max(insets.bottom, 28) + 24 }}
           >
             <View className="flex-row items-center justify-between pb-3 border-b border-gray-200/15">
               <Text className={`text-[15px] font-bold ${palette.text}`}>Digital Health Pass</Text>
@@ -761,9 +885,10 @@ export default function CurexaOverviewScreen() {
           onRequestClose={() => setSelectedRxPdf(null)}
         >
           <View className="flex-1 justify-end bg-black/60">
+            <Pressable className="absolute inset-0" onPress={() => setSelectedRxPdf(null)} />
             <View
               className={`rounded-t-[24px] p-4 ${palette.surface}`}
-              style={{ paddingBottom: Math.max(insets.bottom, 16) + 16, maxHeight: '85%' }}
+              style={{ paddingBottom: Math.max(insets.bottom, 28) + 24, maxHeight: '85%' }}
             >
               <View className="flex-row items-center justify-between pb-3 border-b border-gray-200/15">
                 <Text className={`text-[15px] font-bold ${palette.text}`}>Official e-Prescription (e-Rx)</Text>
@@ -849,9 +974,10 @@ export default function CurexaOverviewScreen() {
           onRequestClose={() => setSelectedLabReport(null)}
         >
           <View className="flex-1 justify-end bg-black/60">
+            <Pressable className="absolute inset-0" onPress={() => setSelectedLabReport(null)} />
             <View
               className={`rounded-t-[24px] p-4 ${palette.surface}`}
-              style={{ paddingBottom: Math.max(insets.bottom, 16) + 16 }}
+              style={{ paddingBottom: Math.max(insets.bottom, 28) + 24 }}
             >
               <View className="flex-row items-center justify-between pb-3 border-b border-gray-200/15">
                 <Text className={`text-[15px] font-bold ${palette.text}`}>Diagnostic Report Details</Text>
@@ -905,6 +1031,16 @@ export default function CurexaOverviewScreen() {
         </Modal>
       )}
 
+      {/* Patient Vitals & Records Modals */}
+      <LogVitalsModal
+        visible={showLogVitalsModal}
+        onClose={() => setShowLogVitalsModal(false)}
+      />
+      <AddAllergyVaccineModal
+        visible={showAddRecordModal}
+        onClose={() => setShowAddRecordModal(false)}
+      />
+
       {/* Hospital Modals */}
       <AddPatientModal
         visible={showAddPatient}
@@ -914,6 +1050,7 @@ export default function CurexaOverviewScreen() {
       <BookAppointmentModal
         visible={showBookVisit}
         onClose={() => setShowBookVisit(false)}
+        defaultPatientName={currentPatientProfile.displayName}
         onSave={(newApt) => addAppointmentLocally(newApt)}
       />
       <CreatePrescriptionModal

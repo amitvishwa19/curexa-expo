@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
@@ -8,6 +9,7 @@ import CurexaHeader from '~/components/curexa/CurexaHeader';
 
 export default function CurexaPharmacyScreen() {
   const { palette } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const { medicines, setMedicines } = useCurexa();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,7 +21,7 @@ export default function CurexaPharmacyScreen() {
   const [name, setName] = useState('');
   const [category, setCategory] = useState('Cardiovascular');
   const [stock, setStock] = useState('100');
-  const [price, setPrice] = useState('15.00');
+  const [price, setPrice] = useState('150.00');
   const [batch, setBatch] = useState('BAT-2026-01');
 
   const categories = ['ALL', 'Cardiovascular', 'Antibiotics', 'Antidiabetic', 'Gastrointestinal', 'Analgesic'];
@@ -45,7 +47,7 @@ export default function CurexaPharmacyScreen() {
       category,
       stock: parseInt(stock) || 100,
       minStock: 50,
-      price: parseFloat(price) || 10.0,
+      price: parseFloat(price) || 120.0,
       expiry: '2028-06-30',
       form: 'Tablet',
       batch,
@@ -148,7 +150,7 @@ export default function CurexaPharmacyScreen() {
 
                     <View className="items-end">
                       <Text className="text-[13px] font-bold text-purple-600">
-                        ${typeof m.price === 'number' ? m.price.toFixed(2) : m.price}
+                        ₹{typeof m.price === 'number' ? m.price.toFixed(2) : m.price}
                       </Text>
                       <View
                         className={`mt-0.5 rounded-full px-2 py-0.5 ${
@@ -188,7 +190,11 @@ export default function CurexaPharmacyScreen() {
       {/* Add Medicine Modal */}
       <Modal visible={showAddModal} transparent animationType="slide" onRequestClose={() => setShowAddModal(false)}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className={`max-h-[85%] rounded-t-[24px] p-3.5 ${palette.surface}`}>
+          <Pressable className="absolute inset-0" onPress={() => setShowAddModal(false)} />
+          <View
+            style={{ paddingBottom: Math.max(insets.bottom, 28) + 24 }}
+            className={`max-h-[85%] rounded-t-[24px] p-3.5 ${palette.surface}`}
+          >
             <View className="mb-2.5 flex-row items-center justify-between border-b border-gray-200/15 pb-2">
               <Text className={`text-[15px] font-bold ${palette.text}`}>Add New Medicine to Stock</Text>
               <Pressable onPress={() => setShowAddModal(false)} className={`rounded-full p-1 ${palette.surfaceAlt}`}>
@@ -202,7 +208,7 @@ export default function CurexaPharmacyScreen() {
                 <TextInput
                   value={name}
                   onChangeText={setName}
-                  placeholder="e.g. Azithromycin 500mg"
+                  placeholder="e.g. Augmentin 625 Duo"
                   placeholderTextColor={palette.textMutedColor}
                   className={`rounded-[12px] p-2.5 text-[12px] border ${palette.surfaceInset} ${palette.border} ${palette.text}`}
                 />
@@ -219,7 +225,7 @@ export default function CurexaPharmacyScreen() {
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className={`text-[10px] font-semibold mb-1 ${palette.textMuted}`}>Unit Price ($)</Text>
+                  <Text className={`text-[10px] font-semibold mb-1 ${palette.textMuted}`}>Unit Price (₹)</Text>
                   <TextInput
                     value={price}
                     onChangeText={setPrice}
@@ -254,10 +260,14 @@ export default function CurexaPharmacyScreen() {
       {/* Dispense Confirm Sheet */}
       <Modal visible={!!dispenseMed} transparent animationType="slide" onRequestClose={() => setDispenseMed(null)}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className={`rounded-t-[24px] p-3.5 ${palette.surface}`}>
+          <Pressable className="absolute inset-0" onPress={() => setDispenseMed(null)} />
+          <View
+            style={{ paddingBottom: Math.max(insets.bottom, 28) + 24 }}
+            className={`rounded-t-[24px] p-3.5 ${palette.surface}`}
+          >
             <Text className={`text-[15px] font-bold ${palette.text}`}>Dispense {dispenseMed?.name}</Text>
             <Text className={`text-[11px] ${palette.textMuted} mb-3`}>
-              Current Stock: {dispenseMed?.stock} units • Price: ${dispenseMed?.price}
+              Current Stock: {dispenseMed?.stock} units • Price: ₹{dispenseMed?.price}
             </Text>
 
             <View className="flex-row gap-2 mb-3">

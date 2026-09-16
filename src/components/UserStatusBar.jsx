@@ -17,13 +17,13 @@ export default function UserStatusBar({ showDrawerButton = true, rightAction }) 
   const [user, setUser] = useState(null);
   const [showSwitcherModal, setShowSwitcherModal] = useState(false);
 
-  let openDrawer = () => {};
+  let openDrawer = () => { };
   try {
     const drawerCtx = useCurexaDrawer();
     if (drawerCtx?.openDrawer) {
       openDrawer = drawerCtx.openDrawer;
     }
-  } catch {}
+  } catch { }
 
   const isPatient = portalMode === 'PATIENT';
 
@@ -46,7 +46,7 @@ export default function UserStatusBar({ showDrawerButton = true, rightAction }) 
 
   const hospitalDisplayName = activeUser?.displayName
     ? (activeUser.displayName.startsWith('Dr.') ? activeUser.displayName : `Dr. ${activeUser.displayName}`)
-    : (activeUser?.name ? (activeUser.name.startsWith('Dr.') ? activeUser.name : `Dr. ${activeUser.name}`) : 'Dr. Alex Mercer');
+    : (activeUser?.name ? (activeUser.name.startsWith('Dr.') ? activeUser.name : `Dr. ${activeUser.name}`) : 'Dr. Rajesh Sharma');
 
   const displayName = isPatient ? patientDisplayName : hospitalDisplayName;
   const initial = displayName?.[0]?.toUpperCase() || (isPatient ? 'P' : 'D');
@@ -78,9 +78,8 @@ export default function UserStatusBar({ showDrawerButton = true, rightAction }) 
               <Image source={{ uri: avatarUri }} className="h-8 w-8 rounded-[12px]" />
             ) : (
               <View
-                className={`h-8 w-8 items-center justify-center rounded-[12px] shadow-sm ${
-                  isPatient ? 'bg-sky-600' : 'bg-emerald-600'
-                }`}
+                className={`h-8 w-8 items-center justify-center rounded-[12px] shadow-sm ${isPatient ? 'bg-sky-600' : 'bg-emerald-600'
+                  }`}
               >
                 <Text className="text-[12px] font-bold text-white">{initial}</Text>
               </View>
@@ -92,14 +91,12 @@ export default function UserStatusBar({ showDrawerButton = true, rightAction }) 
                   {displayName}
                 </Text>
                 <View
-                  className={`rounded-full px-1.5 py-0.5 ${
-                    isPatient ? 'bg-sky-500/20' : 'bg-emerald-500/20'
-                  }`}
+                  className={`rounded-full px-1.5 py-0.5 ${isPatient ? 'bg-sky-500/20' : 'bg-emerald-500/20'
+                    }`}
                 >
                   <Text
-                    className={`text-[8px] font-extrabold ${
-                      isPatient ? 'text-sky-600' : 'text-emerald-600'
-                    }`}
+                    className={`text-[8px] font-extrabold ${isPatient ? 'text-sky-600' : 'text-emerald-600'
+                      }`}
                   >
                     {isPatient ? 'PATIENT' : 'DOCTOR'}
                   </Text>
@@ -117,30 +114,7 @@ export default function UserStatusBar({ showDrawerButton = true, rightAction }) 
           {rightAction}
 
           {/* iOS Portal Switcher Pill Button */}
-          <Pressable
-            onPress={() => setShowSwitcherModal(true)}
-            className={`flex-row items-center gap-1 rounded-[10px] px-2 py-1 ${
-              isPatient ? 'bg-sky-500/15' : 'bg-emerald-500/15'
-            }`}
-          >
-            <Ionicons
-              name={isPatient ? 'person-outline' : 'business-outline'}
-              size={12}
-              color={isPatient ? '#0284c7' : '#059669'}
-            />
-            <Text
-              className={`text-[9.5px] font-bold ${
-                isPatient ? 'text-sky-700' : 'text-emerald-700'
-              }`}
-            >
-              {isPatient ? 'PATIENT' : 'HMS'}
-            </Text>
-            <Ionicons
-              name="swap-vertical"
-              size={10}
-              color={isPatient ? '#0284c7' : '#059669'}
-            />
-          </Pressable>
+
 
           {/* Notifications Center Bell */}
           <Pressable
@@ -154,9 +128,8 @@ export default function UserStatusBar({ showDrawerButton = true, rightAction }) 
             />
             {unreadCount > 0 && (
               <View
-                className={`absolute -right-0.5 -top-0.5 h-3.5 min-w-[14px] items-center justify-center rounded-full px-0.5 ${
-                  isPatient ? 'bg-sky-600' : 'bg-emerald-600'
-                }`}
+                className={`absolute -right-0.5 -top-0.5 h-3.5 min-w-[14px] items-center justify-center rounded-full px-0.5 ${isPatient ? 'bg-sky-600' : 'bg-emerald-600'
+                  }`}
               >
                 <Text className="text-[7.5px] font-bold text-white">
                   {unreadCount > 9 ? '9+' : unreadCount}

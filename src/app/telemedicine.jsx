@@ -52,7 +52,7 @@ export default function CurexaTelemedicineScreen() {
                   <Ionicons name="medkit" size={36} color="#38bdf8" />
                 </View>
                 <Text className="text-[14px] font-bold text-white">
-                  {isPatient ? 'Dr. Sarah Lin, MD (Cardiology)' : 'Eleanor Vance (Patient)'}
+                  {isPatient ? 'Dr. Rajesh Sharma, MD (Cardiology)' : 'Deepika Joshi (Patient)'}
                 </Text>
                 <Text className="text-[11px] text-emerald-400 font-mono mt-0.5">HD 1080p • 60 FPS Connected</Text>
               </View>
@@ -137,7 +137,7 @@ export default function CurexaTelemedicineScreen() {
           </Text>
           <View className="flex-row items-center justify-between">
             <View>
-              <Text className={`text-[13px] font-bold ${palette.text}`}>Eleanor Vance</Text>
+              <Text className={`text-[13px] font-bold ${palette.text}`}>Deepika Joshi</Text>
               <Text className={`text-[10px] ${palette.textMuted}`}>Age 38 • Female • Blood Group: O+</Text>
             </View>
             <View className="rounded-[8px] bg-sky-500/15 px-2.5 py-1">

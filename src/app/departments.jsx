@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
@@ -8,6 +9,7 @@ import CurexaHeader from '~/components/curexa/CurexaHeader';
 
 export default function CurexaDepartmentsScreen() {
   const { palette } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const { departments, setDepartments } = useCurexa();
 
   const [activeTab, setActiveTab] = useState('DEPARTMENTS'); // 'DEPARTMENTS' | 'ROSTER'
@@ -19,11 +21,11 @@ export default function CurexaDepartmentsScreen() {
   const [specialtyText, setSpecialtyText] = useState('');
 
   const doctorsList = [
-    { id: 'd-1', name: 'Dr. Sarah Lin, MD', specialty: 'Cardiology', hours: '08:00 AM - 02:00 PM', status: 'ON_DUTY' },
-    { id: 'd-2', name: 'Dr. Mark Bennett, MD', specialty: 'Neurology', hours: '09:00 AM - 04:00 PM', status: 'ON_DUTY' },
-    { id: 'd-3', name: 'Dr. Rachel Patel, MD', specialty: 'Obstetrics & Gyn', hours: '10:00 AM - 05:00 PM', status: 'ON_CALL' },
-    { id: 'd-4', name: 'Dr. Alan Harper, MS', specialty: 'Orthopedics', hours: '01:00 PM - 08:00 PM', status: 'OFF_DUTY' },
-    { id: 'd-5', name: 'Dr. James Wilson, MD', specialty: 'Emergency / Critical', hours: '24/7 Shift', status: 'ON_DUTY' },
+    { id: 'd-1', name: 'Dr. Rajesh Sharma, MD, DM', specialty: 'Cardiology', hours: '08:00 AM - 02:00 PM', status: 'ON_DUTY' },
+    { id: 'd-2', name: 'Dr. Amit Malhotra, MD, DM', specialty: 'Neurology', hours: '09:00 AM - 04:00 PM', status: 'ON_DUTY' },
+    { id: 'd-3', name: 'Dr. Priya Nair, MD, DGO', specialty: 'Obstetrics & Gyn', hours: '10:00 AM - 05:00 PM', status: 'ON_CALL' },
+    { id: 'd-4', name: 'Dr. Sneha Kulkarni, MS', specialty: 'Orthopedics', hours: '01:00 PM - 08:00 PM', status: 'OFF_DUTY' },
+    { id: 'd-5', name: 'Dr. Vikram Sen, MD', specialty: 'Emergency / Critical', hours: '24/7 Shift', status: 'ON_DUTY' },
   ];
 
   const handleAddDept = () => {
@@ -183,7 +185,11 @@ export default function CurexaDepartmentsScreen() {
       {/* Add Specialty Modal */}
       <Modal visible={showAddModal} transparent animationType="slide" onRequestClose={() => setShowAddModal(false)}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className={`max-h-[85%] rounded-t-[24px] p-3.5 ${palette.surface}`}>
+          <Pressable className="absolute inset-0" onPress={() => setShowAddModal(false)} />
+          <View
+            style={{ paddingBottom: Math.max(insets.bottom, 28) + 24 }}
+            className={`max-h-[85%] rounded-t-[24px] p-3.5 ${palette.surface}`}
+          >
             <View className="mb-2.5 flex-row items-center justify-between border-b border-gray-200/15 pb-2">
               <Text className={`text-[15px] font-bold ${palette.text}`}>Add Medical Department</Text>
               <Pressable onPress={() => setShowAddModal(false)} className={`rounded-full p-1 ${palette.surfaceAlt}`}>

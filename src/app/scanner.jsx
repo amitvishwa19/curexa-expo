@@ -18,7 +18,7 @@ export default function CurexaScannerScreen() {
     const inputCode = code || manualCode;
     if (!inputCode) {
       // Pick first patient as sample
-      const p = patients[0] || { displayName: 'Eleanor Vance', sku: 'PAT-2026-001', ward: 'Cardiology 3B', bed: 'Bed 302', bloodGroup: 'O+' };
+      const p = patients[0] || { displayName: 'Deepika Joshi', sku: 'PAT-2026-001', ward: 'Cardiology 3B', bed: 'Bed 302', bloodGroup: 'O+' };
       setScannedData({
         type: scanMode,
         code: p.sku,

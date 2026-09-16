@@ -55,7 +55,7 @@ export default function IosPortalSwitcherModal({ visible, onClose }) {
           <TouchableWithoutFeedback>
             <View
               style={{
-                paddingBottom: Math.max(insets.bottom, 14),
+                paddingBottom: Math.max(insets.bottom, 28) + 20,
               }}
               className="w-full max-w-lg self-center"
             >

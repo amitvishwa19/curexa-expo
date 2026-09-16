@@ -5,11 +5,11 @@ const STORAGE_KEY = 'devlomatix.notifications';
 const MAX_NOTIFICATIONS = 50;
 
 const SEED_NOTIFICATIONS = [
-  { id: 'seed_1', module: 'curexa', title: 'New OPD appointment booked', description: 'Dr. Sarah Lin confirmed for patient Eleanor Vance at 10:30 AM.', icon: 'calendar', color: '#059669', time: new Date(Date.now() - 600000).toISOString(), read: false },
-  { id: 'seed_2', module: 'curexa', title: 'Diagnostic lab report ready', description: 'Complete Blood Count (CBC) and Lipid Profile results uploaded for John Doe.', icon: 'flask', color: '#0284c7', time: new Date(Date.now() - 1800000).toISOString(), read: false },
-  { id: 'seed_3', module: 'curexa', title: 'ICU Telemetry vitals alert', description: 'SpO2 level drop detected for Bed 302 (Marcus Vance). Current: 94%.', icon: 'pulse', color: '#ef4444', time: new Date(Date.now() - 3600000).toISOString(), read: false },
-  { id: 'seed_4', module: 'curexa', title: 'Pharmacy stock warning', description: 'Amoxicillin 500mg and Paracetamol IV stock running below safety threshold.', icon: 'medkit', color: '#f59e0b', time: new Date(Date.now() - 7200000).toISOString(), read: true },
-  { id: 'seed_5', module: 'curexa', title: 'e-Prescription dispatched', description: 'Digital Rx generated and WhatsApp notification sent to Amy Pond.', icon: 'document-text', color: '#059669', time: new Date(Date.now() - 14400000).toISOString(), read: true },
+  { id: 'seed_1', module: 'curexa', title: 'New OPD appointment booked', description: 'Dr. Rajesh Sharma confirmed for patient Deepika Joshi at 10:30 AM.', icon: 'calendar', color: '#059669', time: new Date(Date.now() - 600000).toISOString(), read: false },
+  { id: 'seed_2', module: 'curexa', title: 'Diagnostic lab report ready', description: 'Complete Blood Count (CBC) and Lipid Profile results uploaded for Rahul Verma.', icon: 'flask', color: '#0284c7', time: new Date(Date.now() - 1800000).toISOString(), read: false },
+  { id: 'seed_3', module: 'curexa', title: 'ICU Telemetry vitals alert', description: 'SpO2 level drop detected for Bed 302 (Rameshwar Prasad). Current: 94%.', icon: 'pulse', color: '#ef4444', time: new Date(Date.now() - 3600000).toISOString(), read: false },
+  { id: 'seed_4', module: 'curexa', title: 'Pharmacy stock warning', description: 'Augmentin 625 Duo and Dolo 650 stock running below safety threshold.', icon: 'medkit', color: '#f59e0b', time: new Date(Date.now() - 7200000).toISOString(), read: true },
+  { id: 'seed_5', module: 'curexa', title: 'e-Prescription dispatched', description: 'Digital Rx generated and WhatsApp notification sent to Ananya Deshmukh.', icon: 'document-text', color: '#059669', time: new Date(Date.now() - 14400000).toISOString(), read: true },
   { id: 'seed_6', module: 'curexa', title: 'Bed cleaning completed', description: 'Bed 204 (General Ward A) sanitized and marked AVAILABLE for admission.', icon: 'bed', color: '#8b5cf6', time: new Date(Date.now() - 28800000).toISOString(), read: true },
 ];
 

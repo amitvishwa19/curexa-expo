@@ -9,27 +9,27 @@ export default function CurexaReportsScreen() {
   const { palette } = useAppTheme();
   const { patients, appointments, wards, invoices } = useCurexa();
 
-  const totalRevenue = invoices.reduce((sum, i) => sum + (i.paidAmount || 0), 0) || 1650.0;
-  const totalBilled = invoices.reduce((sum, i) => sum + (i.amount || 0), 0) || 2280.0;
-  const collectionRate = Math.round((totalRevenue / totalBilled) * 100) || 72;
+  const totalRevenue = invoices.reduce((sum, i) => sum + (i.paidAmount || 0), 0) || 145500.0;
+  const totalBilled = invoices.reduce((sum, i) => sum + (i.amount || 0), 0) || 192800.0;
+  const collectionRate = Math.round((totalRevenue / totalBilled) * 100) || 75;
 
   const totalBeds = 40;
   const occupiedBeds = 30;
   const bedOccupancyRate = Math.round((occupiedBeds / totalBeds) * 100);
 
   const kpis = [
-    { label: 'Total Revenue', value: `$${totalRevenue.toFixed(0)}`, change: '+14% vs last week', color: '#059669', icon: 'wallet' },
+    { label: 'Total Revenue', value: `₹${totalRevenue.toLocaleString('en-IN')}`, change: '+14% vs last week', color: '#059669', icon: 'wallet' },
     { label: 'Bed Occupancy', value: `${bedOccupancyRate}%`, change: 'Optimal Capacity', color: '#8b5cf6', icon: 'bed' },
     { label: 'OPD Footfall', value: '48 Visits', change: 'Today', color: '#0284c7', icon: 'people' },
     { label: 'Collection Rate', value: `${collectionRate}%`, change: 'Target: >85%', color: '#f59e0b', icon: 'pie-chart' },
   ];
 
   const departmentRevenues = [
-    { dept: 'Cardiology & Vascular', revenue: '$14,200', pct: '38%', color: '#ef4444' },
-    { dept: 'Orthopedics & Trauma', revenue: '$9,800', pct: '26%', color: '#f59e0b' },
-    { dept: 'Neurology Unit', revenue: '$6,400', pct: '18%', color: '#8b5cf6' },
-    { dept: 'Obstetrics & Gyn', revenue: '$4,100', pct: '11%', color: '#ec4899' },
-    { dept: 'General OPD & Labs', revenue: '$2,600', pct: '7%', color: '#06b6d4' },
+    { dept: 'Cardiology & Vascular', revenue: '₹14,20,000', pct: '38%', color: '#ef4444' },
+    { dept: 'Orthopedics & Trauma', revenue: '₹9,80,000', pct: '26%', color: '#f59e0b' },
+    { dept: 'Neurology Unit', revenue: '₹6,40,000', pct: '18%', color: '#8b5cf6' },
+    { dept: 'Obstetrics & Gyn', revenue: '₹4,10,000', pct: '11%', color: '#ec4899' },
+    { dept: 'General OPD & Labs', revenue: '₹2,60,000', pct: '7%', color: '#06b6d4' },
   ];
 
   return (
