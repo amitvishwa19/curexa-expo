@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
-import CurexaHeader from '~/components/curexa/CurexaHeader';
+import UserStatusBar from '~/components/UserStatusBar';
 import { BookAppointmentModal } from '~/components/curexa/CurexaModals';
 
 export default function CurexaAppointmentsScreen() {
@@ -50,20 +50,16 @@ export default function CurexaAppointmentsScreen() {
 
   return (
     <AppScreen>
-      <CurexaHeader
-        title={isPatient ? 'My Visits & OPD Tracker' : 'OPD Visits & Queue'}
-        subtitle={
-          isPatient
-            ? 'Live Token & Consultation Queue'
-            : `${filteredAppointments.length} Active Slots`
-        }
+      <UserStatusBar
         rightAction={
           <Pressable
             onPress={() => setShowBookModal(true)}
-            className="flex-row items-center gap-1 rounded-[12px] bg-sky-600 px-2.5 py-1.5 shadow-sm"
+            className={`flex-row items-center gap-1 rounded-[10px] px-2 py-1 shadow-sm ${
+              isPatient ? 'bg-sky-600' : 'bg-emerald-600'
+            }`}
           >
-            <Ionicons name="calendar" size={14} color="#ffffff" />
-            <Text className="text-[11px] font-bold text-white">Book Slot</Text>
+            <Ionicons name="calendar" size={12} color="#ffffff" />
+            <Text className="text-[10px] font-bold text-white">Book Slot</Text>
           </Pressable>
         }
       />

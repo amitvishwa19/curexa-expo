@@ -6,7 +6,7 @@ import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
 import { clearSession } from '~/utils/authStorage';
-import CurexaHeader from '~/components/curexa/CurexaHeader';
+import UserStatusBar from '~/components/UserStatusBar';
 import IosPortalSwitcherModal from '~/components/curexa/IosPortalSwitcherModal';
 
 export default function CurexaSettingsScreen() {
@@ -27,7 +27,7 @@ export default function CurexaSettingsScreen() {
 
   return (
     <AppScreen>
-      <CurexaHeader title="Curexa Configuration" subtitle="App Role & Clinical Settings" />
+      <UserStatusBar />
       <ScrollView className="flex-1 px-3 pt-2 pb-24" showsVerticalScrollIndicator={false}>
         {/* App Mode Switcher (Hospital / Clinic vs. Patient Care) */}
         <View className={`mb-2.5 rounded-[16px] p-3 shadow-sm border border-emerald-500/30 ${palette.surface}`}>
@@ -101,7 +101,7 @@ export default function CurexaSettingsScreen() {
                 <View className={`rounded-[12px] p-2.5 ${palette.surfaceInset}`}>
                   <View className="flex-row items-center justify-between">
                     <Text className={`text-[13px] font-bold ${palette.text}`}>
-                      {currentPatientProfile?.displayName || 'Eleanor Vance'}
+                      {currentPatientProfile?.displayName || 'Patient'}
                     </Text>
                     <View className="rounded-full bg-sky-500/20 px-2 py-0.5">
                       <Text className="text-[9.5px] font-bold text-sky-700">

@@ -7,7 +7,7 @@ import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
 
-import CurexaHeader from '~/components/curexa/CurexaHeader';
+import UserStatusBar from '~/components/UserStatusBar';
 import {
   AddPatientModal,
   BookAppointmentModal,
@@ -138,17 +138,15 @@ export default function CurexaOverviewScreen() {
 
   return (
     <AppScreen>
-      <CurexaHeader
-        title={isPatient ? 'Patient Health Hub' : 'Hospital Command Center'}
-        subtitle={isPatient ? `${currentPatientProfile.displayName} • ${currentPatientProfile.uhid}` : 'Real-time Clinical Operations'}
+      <UserStatusBar
         rightAction={
           isPatient ? (
             <Pressable
               onPress={handleSosCall}
-              className="flex-row items-center gap-1 rounded-[12px] bg-rose-600 px-2.5 py-1.5 shadow-sm"
+              className="flex-row items-center gap-1 rounded-[10px] bg-rose-600 px-2 py-1 shadow-sm"
             >
-              <Ionicons name="call" size={13} color="#ffffff" />
-              <Text className="text-[11px] font-bold text-white">24x7 SOS</Text>
+              <Ionicons name="call" size={11} color="#ffffff" />
+              <Text className="text-[10px] font-bold text-white">SOS</Text>
             </Pressable>
           ) : null
         }

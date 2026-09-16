@@ -1,99 +1,177 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Image, Pressable, Text, View } from 'react-native';
+import { useCurexaDrawer } from '~/components/curexa/CurexaDrawer';
+import IosPortalSwitcherModal from '~/components/curexa/IosPortalSwitcherModal';
 import { useNotificationStore } from '~/contexts/NotificationStore';
+import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
 import { getSession } from '~/utils/authStorage';
 
-export default function UserStatusBar({ scrollY }) {
+export default function UserStatusBar({ showDrawerButton = true, rightAction }) {
   const router = useRouter();
   const { palette } = useAppTheme();
+  const { portalMode, currentPatientProfile, hospitalInfo, loggedInUser } = useCurexa();
   const { unreadCount } = useNotificationStore();
   const [user, setUser] = useState(null);
+  const [showSwitcherModal, setShowSwitcherModal] = useState(false);
+
+  let openDrawer = () => {};
+  try {
+    const drawerCtx = useCurexaDrawer();
+    if (drawerCtx?.openDrawer) {
+      openDrawer = drawerCtx.openDrawer;
+    }
+  } catch {}
+
+  const isPatient = portalMode === 'PATIENT';
 
   useEffect(() => {
     getSession().then((s) => setUser(s?.user ?? null));
   }, []);
 
-  const offsetAnim = useRef(new Animated.Value(0)).current;
-  const opacityAnim = useRef(new Animated.Value(1)).current;
-  const animRef = useRef(null);
-  const settleTimer = useRef(null);
+  const activeUser = loggedInUser || user;
+  const avatarUri = activeUser?.avatar || activeUser?.photo || currentPatientProfile?.avatar;
 
-  const settleTo = (show) => {
-    if (animRef.current) animRef.current.stop();
-    animRef.current = Animated.parallel([
-      Animated.timing(offsetAnim, {
-        toValue: show ? 0 : -84,
-        duration: 240,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: false,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: show ? 1 : 0,
-        duration: 340,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: false,
-      }),
-    ]);
-    animRef.current.start();
-  };
+  const userDisplayName =
+    activeUser?.displayName ||
+    activeUser?.name ||
+    (activeUser?.email ? activeUser.email.split('@')[0] : null);
 
-  useEffect(() => {
-    if (!scrollY) return;
-    const listener = scrollY.addListener(({ value }) => {
-      const rawOffset = -value * 0.35;
-      offsetAnim.setValue(Math.max(-84, Math.min(0, rawOffset)));
-      opacityAnim.setValue(Math.max(0, Math.min(1, 1 - value / 260)));
+  const patientDisplayName =
+    userDisplayName ||
+    (currentPatientProfile?.displayName !== 'Patient' ? currentPatientProfile?.displayName : null) ||
+    'Patient';
 
-      if (settleTimer.current) clearTimeout(settleTimer.current);
-      settleTimer.current = setTimeout(() => {
-        settleTo(value < 160);
-      }, 140);
-    });
-    return () => {
-      scrollY.removeListener(listener);
-      if (settleTimer.current) clearTimeout(settleTimer.current);
-      if (animRef.current) animRef.current.stop();
-    };
-  }, [scrollY]);
+  const hospitalDisplayName = activeUser?.displayName
+    ? (activeUser.displayName.startsWith('Dr.') ? activeUser.displayName : `Dr. ${activeUser.displayName}`)
+    : (activeUser?.name ? (activeUser.name.startsWith('Dr.') ? activeUser.name : `Dr. ${activeUser.name}`) : 'Dr. Alex Mercer');
 
-  const avatarUri = user?.avatar || user?.photo;
-  const userInitial = (user?.displayName || user?.name || user?.email)?.[0]?.toUpperCase() || 'U';
+  const displayName = isPatient ? patientDisplayName : hospitalDisplayName;
+  const initial = displayName?.[0]?.toUpperCase() || (isPatient ? 'P' : 'D');
+
+  const emailDisplay = activeUser?.email || currentPatientProfile?.email || '';
+  const subtitle = isPatient
+    ? `UHID: ${currentPatientProfile?.uhid || 'CUX-889102'}${emailDisplay ? ` • ${emailDisplay}` : ''}`
+    : `${hospitalInfo?.name || 'Curexa Super Specialty'} • On Duty`;
 
   return (
-    <Animated.View className={`flex-row items-center gap-2 px-4 py-2 border-b ${palette.border}`}
-      style={{
-        backgroundColor: palette.colors.surface,
-        transform: scrollY ? [{ translateY: offsetAnim }] : undefined,
-        opacity: scrollY ? opacityAnim : 1,
-      }}>
-      {avatarUri ? (
-        <Image source={{ uri: avatarUri }} className="h-10 w-10 rounded-full" />
-      ) : (
-        <View className="h-7 w-7 items-center justify-center rounded-full bg-teal-600">
-          <Text className="text-sm font-bold text-white">
-            {userInitial}
-          </Text>
+    <>
+      <View className={`flex-row items-center justify-between px-3 py-2 border-b ${palette.surface} ${palette.border}`}>
+        {/* Left: Drawer Toggle (optional) & User Profile */}
+        <View className="flex-1 flex-row items-center gap-2 mr-2">
+          {showDrawerButton && (
+            <Pressable
+              onPress={openDrawer}
+              className={`h-8 w-8 items-center justify-center rounded-[12px] ${palette.surfaceAlt}`}
+            >
+              <Ionicons name="menu-outline" size={18} color={palette.textColor} />
+            </Pressable>
+          )}
+
+          <Pressable
+            onPress={() => router.push('/(tabs)/settings')}
+            className="flex-1 flex-row items-center gap-2"
+          >
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} className="h-8 w-8 rounded-[12px]" />
+            ) : (
+              <View
+                className={`h-8 w-8 items-center justify-center rounded-[12px] shadow-sm ${
+                  isPatient ? 'bg-sky-600' : 'bg-emerald-600'
+                }`}
+              >
+                <Text className="text-[12px] font-bold text-white">{initial}</Text>
+              </View>
+            )}
+
+            <View className="flex-1">
+              <View className="flex-row items-center gap-1.5">
+                <Text className={`text-[13px] font-bold ${palette.text}`} numberOfLines={1}>
+                  {displayName}
+                </Text>
+                <View
+                  className={`rounded-full px-1.5 py-0.5 ${
+                    isPatient ? 'bg-sky-500/20' : 'bg-emerald-500/20'
+                  }`}
+                >
+                  <Text
+                    className={`text-[8px] font-extrabold ${
+                      isPatient ? 'text-sky-600' : 'text-emerald-600'
+                    }`}
+                  >
+                    {isPatient ? 'PATIENT' : 'DOCTOR'}
+                  </Text>
+                </View>
+              </View>
+              <Text className={`text-[10px] ${palette.textMuted}`} numberOfLines={1}>
+                {subtitle}
+              </Text>
+            </View>
+          </Pressable>
         </View>
-      )}
-      <View className="flex-1">
-        <Text className={`text-lg font-semibold ${palette.text}`} numberOfLines={1}>
-          {user?.displayName || user?.name || 'User'}
-        </Text>
-        <Text className={`text-sm ${palette.textMuted}`} numberOfLines={1}>
-          {user?.email || ''}
-        </Text>
+
+        {/* Right: Actions, Portal Switcher Pill & Notification Bell */}
+        <View className="flex-row items-center gap-1.5">
+          {rightAction}
+
+          {/* iOS Portal Switcher Pill Button */}
+          <Pressable
+            onPress={() => setShowSwitcherModal(true)}
+            className={`flex-row items-center gap-1 rounded-[10px] px-2 py-1 ${
+              isPatient ? 'bg-sky-500/15' : 'bg-emerald-500/15'
+            }`}
+          >
+            <Ionicons
+              name={isPatient ? 'person-outline' : 'business-outline'}
+              size={12}
+              color={isPatient ? '#0284c7' : '#059669'}
+            />
+            <Text
+              className={`text-[9.5px] font-bold ${
+                isPatient ? 'text-sky-700' : 'text-emerald-700'
+              }`}
+            >
+              {isPatient ? 'PATIENT' : 'HMS'}
+            </Text>
+            <Ionicons
+              name="swap-vertical"
+              size={10}
+              color={isPatient ? '#0284c7' : '#059669'}
+            />
+          </Pressable>
+
+          {/* Notifications Center Bell */}
+          <Pressable
+            onPress={() => router.push('/(misc)/notifications')}
+            className={`relative h-8 w-8 items-center justify-center rounded-[12px] ${palette.surfaceAlt}`}
+          >
+            <Ionicons
+              name={unreadCount > 0 ? 'notifications' : 'notifications-outline'}
+              size={16}
+              color={unreadCount > 0 ? (isPatient ? '#0284c7' : '#059669') : palette.textMutedColor}
+            />
+            {unreadCount > 0 && (
+              <View
+                className={`absolute -right-0.5 -top-0.5 h-3.5 min-w-[14px] items-center justify-center rounded-full px-0.5 ${
+                  isPatient ? 'bg-sky-600' : 'bg-emerald-600'
+                }`}
+              >
+                <Text className="text-[7.5px] font-bold text-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </Text>
+              </View>
+            )}
+          </Pressable>
+        </View>
       </View>
-      <TouchableOpacity onPress={() => router.push('/(misc)/notifications')} className="relative p-1">
-        <Ionicons name="notifications-outline" size={24} color={palette.textMutedColor} />
-        {unreadCount > 0 && (
-          <View className="absolute -right-0.5 -top-0.5 h-3.5 min-w-[14px] items-center justify-center rounded-full bg-teal-600 px-0.5">
-            <Text className="text-[8px] font-bold text-white">{unreadCount > 9 ? '9+' : unreadCount}</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-    </Animated.View>
+
+      {/* iOS Portal Switcher Sheet Modal */}
+      <IosPortalSwitcherModal
+        visible={showSwitcherModal}
+        onClose={() => setShowSwitcherModal(false)}
+      />
+    </>
   );
 }

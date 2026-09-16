@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
-import CurexaHeader from '~/components/curexa/CurexaHeader';
+import UserStatusBar from '~/components/UserStatusBar';
 import { AddPatientModal, PatientDetailModal } from '~/components/curexa/CurexaModals';
 
 export default function CurexaPatientsScreen() {
@@ -115,29 +115,23 @@ export default function CurexaPatientsScreen() {
 
   return (
     <AppScreen>
-      <CurexaHeader
-        title={isPatient ? 'My Health Records' : 'Patient EMR Directory'}
-        subtitle={
-          isPatient
-            ? `${currentPatientProfile.displayName} • Health History`
-            : `${filteredPatients.length} Patients Recorded`
-        }
+      <UserStatusBar
         rightAction={
           isPatient ? (
             <Pressable
               onPress={() => Alert.alert('Share Health Record', 'Generated secure 24-hour EMR share link: https://curexa.health/share/CUX-889102')}
-              className="flex-row items-center gap-1 rounded-[12px] bg-sky-600 px-2.5 py-1.5 shadow-sm"
+              className="flex-row items-center gap-1 rounded-[10px] bg-sky-600 px-2 py-1 shadow-sm"
             >
-              <Ionicons name="share-social-outline" size={14} color="#ffffff" />
-              <Text className="text-[11px] font-bold text-white">Share EMR</Text>
+              <Ionicons name="share-social-outline" size={12} color="#ffffff" />
+              <Text className="text-[10px] font-bold text-white">Share</Text>
             </Pressable>
           ) : (
             <Pressable
               onPress={() => setShowAddModal(true)}
-              className="flex-row items-center gap-1 rounded-[12px] bg-emerald-600 px-2.5 py-1.5"
+              className="flex-row items-center gap-1 rounded-[10px] bg-emerald-600 px-2 py-1 shadow-sm"
             >
-              <Ionicons name="person-add" size={14} color="#ffffff" />
-              <Text className="text-[11px] font-bold text-white">Add Patient</Text>
+              <Ionicons name="person-add" size={12} color="#ffffff" />
+              <Text className="text-[10px] font-bold text-white">Add</Text>
             </Pressable>
           )
         }

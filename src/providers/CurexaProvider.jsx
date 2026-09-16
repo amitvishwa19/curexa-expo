@@ -13,6 +13,7 @@ import {
   MOCK_ON_CALL_DOCTORS,
   MOCK_WHATSAPP_LOGS,
 } from '~/services/curexa';
+import { getSession } from '~/utils/authStorage';
 
 const CurexaContext = createContext(null);
 
@@ -46,9 +47,51 @@ export function CurexaProvider({ children }) {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [showPatientDetail, setShowPatientDetail] = useState(false);
 
-  // Hydrate portal mode from AsyncStorage
+  const [loggedInUser, setLoggedInUser] = useState(null);
+
+  const refreshSession = useCallback(async () => {
+    try {
+      const session = await getSession();
+      if (session?.user) {
+        const u = session.user;
+        setLoggedInUser(u);
+        const name = u.displayName || u.name || (u.email ? u.email.split('@')[0] : 'Patient');
+        const uhidCode = u.uhid || (u._id ? `CUX-${String(u._id).slice(-6).toUpperCase()}` : 'CUX-889102');
+
+        setCurrentPatientProfile((prev) => ({
+          ...prev,
+          id: u._id || u.id || prev.id,
+          sku: u.sku || prev.sku,
+          displayName: name,
+          email: u.email || prev.email,
+          phone: u.phone || prev.phone,
+          avatar: u.avatar || u.photo || u.image || null,
+          uhid: uhidCode,
+          gender: u.gender || prev.gender,
+          age: u.age || prev.age,
+          bloodGroup: u.bloodGroup || prev.bloodGroup,
+        }));
+
+        // Dynamically associate initial patient records with logged-in user
+        setPrescriptions((prev) =>
+          prev.map((p) => ({
+            ...p,
+            patientName: name,
+          }))
+        );
+
+        setAppointments((prev) =>
+          prev.map((a, idx) => (idx === 0 ? { ...a, patientName: name } : a))
+        );
+      }
+    } catch (e) {
+      console.log('Error hydrating user session:', e);
+    }
+  }, []);
+
+  // Hydrate portal mode and user session
   useEffect(() => {
-    async function hydratePortalMode() {
+    async function hydrateInitial() {
       try {
         const stored = await AsyncStorage.getItem('devlomatix.curexa_portal_mode');
         if (stored === 'HOSPITAL' || stored === 'PATIENT') {
@@ -57,9 +100,10 @@ export function CurexaProvider({ children }) {
       } catch (e) {
         // ignore
       }
+      await refreshSession();
     }
-    hydratePortalMode();
-  }, []);
+    hydrateInitial();
+  }, [refreshSession]);
 
   const setPortalMode = async (newMode) => {
     setPortalModeState(newMode);
@@ -74,13 +118,13 @@ export function CurexaProvider({ children }) {
   const [currentPatientProfile, setCurrentPatientProfile] = useState({
     id: 'p-1',
     sku: 'PAT-2026-001',
-    displayName: 'Eleanor Vance',
+    displayName: 'Patient',
     gender: 'Female',
     age: 38,
     bloodGroup: 'O+',
     uhid: 'CUX-889102',
     phone: '+1 (555) 234-5678',
-    email: 'eleanor.vance@example.com',
+    email: 'patient@example.com',
     emergencyContact: {
       name: 'Arthur Vance',
       relation: 'Spouse',
@@ -308,6 +352,8 @@ export function CurexaProvider({ children }) {
     showPatientDetail,
     setShowPatientDetail,
     viewPatientDetails,
+    loggedInUser,
+    refreshSession,
     currentPatientProfile,
     setCurrentPatientProfile,
     prescriptions,
