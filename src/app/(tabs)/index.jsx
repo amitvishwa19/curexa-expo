@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Alert, Animated, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
@@ -23,6 +23,7 @@ export default function CurexaOverviewScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { palette } = useAppTheme();
+  const scrollY = useRef(new Animated.Value(0)).current;
   const {
     portalMode,
     currentPatientProfile,
@@ -168,6 +169,7 @@ export default function CurexaOverviewScreen() {
   return (
     <AppScreen>
       <UserStatusBar
+        scrollY={scrollY}
         rightAction={
           isPatient ? (
             <Pressable
@@ -185,10 +187,12 @@ export default function CurexaOverviewScreen() {
         /* ========================================================================= */
         /*                       PATIENT HEALTH HUB VIEW                             */
         /* ========================================================================= */
-        <ScrollView
+        <Animated.ScrollView
           className="flex-1 px-3 pt-2"
           contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+          scrollEventThrottle={16}
         >
           {/* Family Dependents Selector Strip */}
           <View className="mb-2 flex-row items-center justify-between">
@@ -574,13 +578,15 @@ export default function CurexaOverviewScreen() {
               ))}
             </View>
           </View>
-        </ScrollView>
+        </Animated.ScrollView>
       ) : (
         /* HOSPITAL COMMAND CENTER VIEW */
-        <ScrollView
+        <Animated.ScrollView
           className="flex-1 px-3 pt-2"
           contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+          scrollEventThrottle={16}
         >
           {/* Hospital Banner */}
           <View className={`mb-2.5 rounded-[16px] p-3 shadow-sm ${palette.surface}`}>
@@ -804,7 +810,7 @@ export default function CurexaOverviewScreen() {
               ))}
             </View>
           </View>
-        </ScrollView>
+        </Animated.ScrollView>
       )}
 
       {/* Digital Health ID Card Modal */}

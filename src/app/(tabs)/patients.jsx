@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import { Alert, Animated, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
@@ -13,6 +13,7 @@ import { AddPatientModal, PatientDetailModal } from '~/components/curexa/CurexaM
 export default function CurexaPatientsScreen() {
   const insets = useSafeAreaInsets();
   const { palette } = useAppTheme();
+  const scrollY = useRef(new Animated.Value(0)).current;
   const {
     portalMode,
     currentPatientProfile,
@@ -124,6 +125,7 @@ export default function CurexaPatientsScreen() {
   return (
     <AppScreen>
       <UserStatusBar
+        scrollY={scrollY}
         rightAction={
           isPatient ? (
             <Pressable
@@ -185,10 +187,12 @@ export default function CurexaPatientsScreen() {
             </View>
           </ScrollView>
 
-          <ScrollView
+          <Animated.ScrollView
             showsVerticalScrollIndicator={false}
             className="flex-1"
             contentContainerStyle={{ paddingBottom: 120 }}
+            onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+            scrollEventThrottle={16}
           >
             {/* TAB: TIMELINE */}
             {patientTab === 'TIMELINE' && (
@@ -514,7 +518,7 @@ export default function CurexaPatientsScreen() {
                 </View>
               </View>
             )}
-          </ScrollView>
+          </Animated.ScrollView>
         </View>
       ) : (
         /* ========================================================================= */
@@ -566,10 +570,12 @@ export default function CurexaPatientsScreen() {
           </ScrollView>
 
           {/* Patient Cards List */}
-          <ScrollView
+          <Animated.ScrollView
             showsVerticalScrollIndicator={false}
             className="flex-1"
             contentContainerStyle={{ paddingBottom: 120 }}
+            onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+            scrollEventThrottle={16}
           >
             <View className="gap-2">
               {filteredPatients.map((p) => (
@@ -661,7 +667,7 @@ export default function CurexaPatientsScreen() {
                 </View>
               )}
             </View>
-          </ScrollView>
+          </Animated.ScrollView>
         </View>
       )}
 

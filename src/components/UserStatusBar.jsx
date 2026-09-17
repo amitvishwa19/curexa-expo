@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Image, Pressable, Text, View } from 'react-native';
 import { useCurexaDrawer } from '~/components/curexa/CurexaDrawer';
 import IosPortalSwitcherModal from '~/components/curexa/IosPortalSwitcherModal';
 import { useNotificationStore } from '~/contexts/NotificationStore';
@@ -9,7 +9,7 @@ import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
 import { getSession } from '~/utils/authStorage';
 
-export default function UserStatusBar({ showDrawerButton = true, rightAction }) {
+export default function UserStatusBar({ scrollY, showDrawerButton = true, rightAction }) {
   const router = useRouter();
   const { palette } = useAppTheme();
   const { portalMode, currentPatientProfile, hospitalInfo, loggedInUser } = useCurexa();
@@ -30,6 +30,49 @@ export default function UserStatusBar({ showDrawerButton = true, rightAction }) 
   useEffect(() => {
     getSession().then((s) => setUser(s?.user ?? null));
   }, []);
+
+  const offsetAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(1)).current;
+  const animRef = useRef(null);
+  const settleTimer = useRef(null);
+
+  const settleTo = (show) => {
+    if (animRef.current) animRef.current.stop();
+    animRef.current = Animated.parallel([
+      Animated.timing(offsetAnim, {
+        toValue: show ? 0 : -84,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: show ? 1 : 0,
+        duration: 340,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
+      }),
+    ]);
+    animRef.current.start();
+  };
+
+  useEffect(() => {
+    if (!scrollY) return;
+    const listener = scrollY.addListener(({ value }) => {
+      const rawOffset = -value * 0.35;
+      offsetAnim.setValue(Math.max(-84, Math.min(0, rawOffset)));
+      opacityAnim.setValue(Math.max(0, Math.min(1, 1 - value / 260)));
+
+      if (settleTimer.current) clearTimeout(settleTimer.current);
+      settleTimer.current = setTimeout(() => {
+        settleTo(value < 160);
+      }, 140);
+    });
+    return () => {
+      scrollY.removeListener(listener);
+      if (settleTimer.current) clearTimeout(settleTimer.current);
+      if (animRef.current) animRef.current.stop();
+    };
+  }, [scrollY]);
 
   const activeUser = loggedInUser || user;
   const avatarUri = activeUser?.avatar || activeUser?.photo || currentPatientProfile?.avatar;
@@ -58,7 +101,14 @@ export default function UserStatusBar({ showDrawerButton = true, rightAction }) 
 
   return (
     <>
-      <View className={`flex-row items-center justify-between px-3 py-2 border-b ${palette.surface} ${palette.border}`}>
+      <Animated.View
+        className={`flex-row items-center justify-between px-3 py-2 border-b ${palette.border}`}
+        style={{
+          backgroundColor: palette.colors.surface,
+          transform: scrollY ? [{ translateY: offsetAnim }] : undefined,
+          opacity: scrollY ? opacityAnim : 1,
+        }}
+      >
         {/* Left: Drawer Toggle (optional) & User Profile */}
         <View className="flex-1 flex-row items-center gap-2 mr-2">
           {showDrawerButton && (
@@ -138,7 +188,7 @@ export default function UserStatusBar({ showDrawerButton = true, rightAction }) 
             )}
           </Pressable>
         </View>
-      </View>
+      </Animated.View>
 
       {/* iOS Portal Switcher Sheet Modal */}
       <IosPortalSwitcherModal

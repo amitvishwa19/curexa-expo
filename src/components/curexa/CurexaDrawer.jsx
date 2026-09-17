@@ -8,6 +8,7 @@ import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
 import { clearSession } from '~/utils/authStorage';
 import IosPortalSwitcherModal from './IosPortalSwitcherModal';
+import IosSignOutModal from './IosSignOutModal';
 
 const CurexaDrawerContext = createContext(null);
 
@@ -114,6 +115,7 @@ function CurexaDrawerModal({ visible, onClose }) {
   const { palette } = useAppTheme();
   const { portalMode, currentPatientProfile } = useCurexa();
   const [showSwitcher, setShowSwitcher] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
 
   const isPatient = portalMode === 'PATIENT';
   const menuCategories = isPatient ? patientCategories : hospitalCategories;
@@ -264,10 +266,9 @@ function CurexaDrawerModal({ visible, onClose }) {
             {/* Footer Actions */}
             <View className="px-3 pt-2 border-t border-gray-200/15">
               <Pressable
-                onPress={async () => {
+                onPress={() => {
                   onClose();
-                  await clearSession();
-                  router.replace('/(auth)/login');
+                  setTimeout(() => setShowSignOutModal(true), 150);
                 }}
                 className="flex-row items-center justify-center gap-2 rounded-[14px] bg-red-500/15 py-2.5"
               >
@@ -283,6 +284,12 @@ function CurexaDrawerModal({ visible, onClose }) {
       <IosPortalSwitcherModal
         visible={showSwitcher}
         onClose={() => setShowSwitcher(false)}
+      />
+
+      {/* iOS Sign Out Modal */}
+      <IosSignOutModal
+        visible={showSignOutModal}
+        onClose={() => setShowSignOutModal(false)}
       />
     </>
   );

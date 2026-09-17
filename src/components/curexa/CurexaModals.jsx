@@ -1085,4 +1085,5 @@ export function CreateInvoiceModal({ visible, onClose, onSave }) {
 }
 
 export { default as IosPortalSwitcherModal } from './IosPortalSwitcherModal';
+export { default as IosSignOutModal } from './IosSignOutModal';
 export default PatientDetailModal;

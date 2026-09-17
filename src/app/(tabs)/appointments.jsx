@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import { Alert, Animated, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
@@ -13,6 +13,7 @@ export default function CurexaAppointmentsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { palette } = useAppTheme();
+  const scrollY = useRef(new Animated.Value(0)).current;
   const { portalMode, currentPatientProfile, appointments, setAppointments, addAppointmentLocally } = useCurexa();
 
   const isPatient = portalMode === 'PATIENT';
@@ -51,6 +52,7 @@ export default function CurexaAppointmentsScreen() {
   return (
     <AppScreen>
       <UserStatusBar
+        scrollY={scrollY}
         rightAction={
           <Pressable
             onPress={() => setShowBookModal(true)}
@@ -194,10 +196,12 @@ export default function CurexaAppointmentsScreen() {
             ))}
           </View>
 
-          <ScrollView
+          <Animated.ScrollView
             showsVerticalScrollIndicator={false}
             className="flex-1"
             contentContainerStyle={{ paddingBottom: 120 }}
+            onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+            scrollEventThrottle={16}
           >
             <View className="gap-2">
               {(patientTab === 'UPCOMING'
@@ -276,7 +280,7 @@ export default function CurexaAppointmentsScreen() {
                 </Pressable>
               ))}
             </View>
-          </ScrollView>
+          </Animated.ScrollView>
         </View>
       ) : (
         /* ========================================================================= */
@@ -307,10 +311,12 @@ export default function CurexaAppointmentsScreen() {
           </ScrollView>
 
           {/* Appointments List */}
-          <ScrollView
+          <Animated.ScrollView
             showsVerticalScrollIndicator={false}
             className="flex-1"
             contentContainerStyle={{ paddingBottom: 120 }}
+            onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+            scrollEventThrottle={16}
           >
             <View className="gap-2">
               {filteredAppointments.map((apt) => (
@@ -400,7 +406,7 @@ export default function CurexaAppointmentsScreen() {
                 </View>
               )}
             </View>
-          </ScrollView>
+          </Animated.ScrollView>
         </View>
       )}
 

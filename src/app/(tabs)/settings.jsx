@@ -1,18 +1,21 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Alert, Animated, Pressable, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 import AppScreen from '~/components/AppScreen';
 import { useCurexa } from '~/providers/CurexaProvider';
 import { useAppTheme } from '~/theme/AppTheme';
 import { clearSession } from '~/utils/authStorage';
 import UserStatusBar from '~/components/UserStatusBar';
 import IosPortalSwitcherModal from '~/components/curexa/IosPortalSwitcherModal';
+import IosSignOutModal from '~/components/curexa/IosSignOutModal';
 
 export default function CurexaSettingsScreen() {
   const router = useRouter();
   const { palette } = useAppTheme();
+  const scrollY = useRef(new Animated.Value(0)).current;
   const [showPortalModal, setShowPortalModal] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
   const {
     hospitalInfo,
     portalMode,
@@ -34,11 +37,13 @@ export default function CurexaSettingsScreen() {
 
   return (
     <AppScreen>
-      <UserStatusBar />
-      <ScrollView
+      <UserStatusBar scrollY={scrollY} />
+      <Animated.ScrollView
         className="flex-1 px-3 pt-2"
         contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+        scrollEventThrottle={16}
       >
         {/* App Mode Switcher (Hospital / Clinic vs. Patient Care) */}
         <View className={`mb-2.5 rounded-[16px] p-3 shadow-sm border border-emerald-500/30 ${palette.surface}`}>
@@ -370,33 +375,23 @@ export default function CurexaSettingsScreen() {
 
         {/* Sign Out Button */}
         <Pressable
-          onPress={async () => {
-            Alert.alert(
-              'Sign Out',
-              'Are you sure you want to sign out of Curexa?',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Sign Out',
-                  style: 'destructive',
-                  onPress: async () => {
-                    await clearSession();
-                    router.replace('/(auth)/login');
-                  },
-                },
-              ]
-            );
-          }}
+          onPress={() => setShowSignOutModal(true)}
           className="rounded-[14px] bg-red-600/15 border border-red-500/30 py-3 items-center justify-center shadow-sm"
         >
           <Text className="text-[12px] font-bold text-red-500">Sign Out of Curexa</Text>
         </Pressable>
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* iOS Portal Switcher Modal */}
       <IosPortalSwitcherModal
         visible={showPortalModal}
         onClose={() => setShowPortalModal(false)}
+      />
+
+      {/* iOS Sign Out Confirmation Modal */}
+      <IosSignOutModal
+        visible={showSignOutModal}
+        onClose={() => setShowSignOutModal(false)}
       />
     </AppScreen>
   );
