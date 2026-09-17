@@ -18,8 +18,8 @@ import { saveSession } from "../../utils/authStorage";
 
 export default function LoginScreen() {
     const router = useRouter();
-    const [email, setEmail] = useState("amitvishwa19@gmail.com");
-    const [password, setPassword] = useState("password");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
 

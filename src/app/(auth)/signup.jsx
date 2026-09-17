@@ -9,9 +9,9 @@ import { apiUrls } from '../../utils/api';
 
 export default function SignupScreen() {
     const router = useRouter();
-    const [email, setEmail] = useState('founder@devlomatix.com');
-    const [password, setPassword] = useState('111111');
-    const [confirmPassword, setConfirmPassword] = useState('111111');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     async function handleRegister() {
@@ -91,7 +91,7 @@ export default function SignupScreen() {
                 label="Work email"
                 value={email}
                 onChangeText={setEmail}
-                placeholder="founder@devlomatix.com"
+                placeholder="name@company.com"
                 keyboardType="email-address"
                 autoCapitalize="none" />
 
@@ -99,14 +99,14 @@ export default function SignupScreen() {
                 label="Password"
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Create a strong password"
+                placeholder="password"
                 secureTextEntry />
 
             <CustomInput
                 label="Confirm Password"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                placeholder="Re-enter your password"
+                placeholder="confirm password"
                 secureTextEntry />
 
 

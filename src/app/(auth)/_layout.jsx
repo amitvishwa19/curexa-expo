@@ -13,24 +13,24 @@ const authRouteCopy = {
   login: {
     badge: 'CUREXA',
     title: 'Welcome to Curexa',
-    subtitle: 'Sign in to access your clinic, hospital EMR, and patient care management portal.'
+    subtitle: 'Sign in to access your account and continue.'
   },
   signup: {
     badge: 'CREATE ACCOUNT',
     title: 'Join Curexa Health',
-    subtitle: 'Set up your medical staff or patient profile to get started.'
+    subtitle: 'Create your account to get started.'
   },
   'forgot-password': {
     badge: 'RECOVERY',
     title: 'Reset your password',
     subtitle:
-    'Enter your email and we will send you verification instructions for password recovery.'
+      'Enter your registered email address to receive password reset instructions.'
   },
   verify: {
     badge: 'VERIFICATION',
     title: 'Confirm your access',
     subtitle:
-    'Enter the six-digit verification code to access the Curexa portal.'
+      'Enter the six-digit verification code to continue.'
   }
 };
 
@@ -51,11 +51,9 @@ export default function AuthLayout() {
           <View className="flex-1">
             <View className="min-h-full justify-center px-6 py-7">
               <View className="mb-6 items-center">
-                
-                <BrandLogo size={200} />
-                <Text className="mt-5 text-center text-3xl font-bold text-slate-900">
-                  {copy.title}
-                </Text>
+
+                <BrandLogo size={600} />
+
                 <Text className="mt-2.5 max-w-80 text-center text-[15px] leading-6 text-slate-600">
                   {copy.subtitle}
                 </Text>

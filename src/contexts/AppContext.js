@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState } from "react";
 import * as SecureStore from 'expo-secure-store';
 import { globalKeys, storageKey } from "~/utils/constants";
 import { Dimensions, PermissionsAndroid, Platform, useColorScheme, useWindowDimensions } from "react-native";
-import Geolocation from 'react-native-geolocation-service';
 import axios from "axios";
 import { ROLES } from "~/utils/types";
 import * as Device from 'expo-device';

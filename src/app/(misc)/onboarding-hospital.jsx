@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useCurexa } from '~/providers/CurexaProvider';
 import { getSession } from '~/utils/authStorage';
 
 const ONBOARDING_SLIDES = [
@@ -40,6 +41,7 @@ const ONBOARDING_SLIDES = [
 export default function CurexaOnboardingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { showDummyData } = useCurexa();
   const { width, height } = useWindowDimensions();
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef(null);
@@ -81,7 +83,7 @@ export default function CurexaOnboardingScreen() {
     <View style={{ flex: 1, width, height, backgroundColor: '#ffffff', overflow: 'hidden' }}>
       <StatusBar style="dark" />
 
-      {/* Top Floating Skip Button & Slide Counter */}
+      {/* Top Floating Skip Button & Optional Dev Mode Tour / Switch Controls */}
       <View
         style={{
           position: 'absolute',
@@ -89,39 +91,41 @@ export default function CurexaOnboardingScreen() {
           left: 16,
           right: 16,
           flexDirection: 'row',
-          justifyContent: 'space-between',
+          justifyContent: showDummyData ? 'space-between' : 'flex-end',
           alignItems: 'center',
           zIndex: 30,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View
-            style={{
-              backgroundColor: 'rgba(2, 132, 122, 0.12)',
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-              borderRadius: 12,
-            }}
-          >
-            <Text style={{ color: '#02847a', fontSize: 11, fontWeight: '700' }}>
-              Hospital Tour ({currentIndex + 1}/{ONBOARDING_SLIDES.length})
-            </Text>
-          </View>
+        {showDummyData && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <View
+              style={{
+                backgroundColor: 'rgba(2, 132, 122, 0.12)',
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+                borderRadius: 12,
+              }}
+            >
+              <Text style={{ color: '#02847a', fontSize: 11, fontWeight: '700' }}>
+                Hospital Tour ({currentIndex + 1}/{ONBOARDING_SLIDES.length})
+              </Text>
+            </View>
 
-          <Pressable
-            onPress={() => router.replace('/(misc)/onboarding-patient')}
-            style={{
-              backgroundColor: 'rgba(14, 165, 233, 0.12)',
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              borderRadius: 12,
-            }}
-          >
-            <Text style={{ color: '#0284c7', fontSize: 10, fontWeight: '700' }}>
-              Switch to Patient
-            </Text>
-          </Pressable>
-        </View>
+            <Pressable
+              onPress={() => router.replace('/(misc)/onboarding-patient')}
+              style={{
+                backgroundColor: 'rgba(14, 165, 233, 0.12)',
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                borderRadius: 12,
+              }}
+            >
+              <Text style={{ color: '#0284c7', fontSize: 10, fontWeight: '700' }}>
+                Switch to Patient
+              </Text>
+            </Pressable>
+          </View>
+        )}
 
         <Pressable
           onPress={finishOnboarding}
