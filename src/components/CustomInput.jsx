@@ -15,7 +15,8 @@ export default function CustomInput({ label, value, onChangeText, placeholder, s
                     placeholder={placeholder}
                     placeholderTextColor="#94a3b8"
                     keyboardType={keyboardType}
-                    autoCapitalize={autoCapitalize}
+                    autoCapitalize={autoCapitalize ?? (secureTextEntry ? 'none' : undefined)}
+                    autoCorrect={secureTextEntry ? false : undefined}
                     secureTextEntry={isObscured}
                     className={`h-12 w-full rounded-lg border border-slate-200 bg-slate-50 pl-4 ${secureTextEntry ? 'pr-12' : 'pr-4'} text-[15px] text-slate-900`} />
 

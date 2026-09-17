@@ -18,8 +18,8 @@ import { saveSession } from "../../utils/authStorage";
 
 export default function LoginScreen() {
     const router = useRouter();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("tester@devlomatix.com");
+    const [password, setPassword] = useState("password");
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -182,6 +182,7 @@ export default function LoginScreen() {
                 onChangeText={setPassword}
                 placeholder="Enter your password"
                 secureTextEntry
+                autoCapitalize="none"
             />
 
             <Pressable

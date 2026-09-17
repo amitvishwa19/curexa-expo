@@ -100,14 +100,16 @@ export default function SignupScreen() {
                 value={password}
                 onChangeText={setPassword}
                 placeholder="password"
-                secureTextEntry />
+                secureTextEntry
+                autoCapitalize="none" />
 
             <CustomInput
                 label="Confirm Password"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder="confirm password"
-                secureTextEntry />
+                secureTextEntry
+                autoCapitalize="none" />
 
 
             <CustomButton
